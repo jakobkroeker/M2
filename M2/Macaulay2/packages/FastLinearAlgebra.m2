@@ -531,6 +531,7 @@ NONTEST = (str) -> null
 -----------------------------------
 TEST ///
 loadPackage "FastLinearAlgebra"
+debug Core
     kk = ZZp 101
 
     M3 = mutableMatrix(kk, 200, 200)
@@ -590,6 +591,7 @@ TEST ///
     -- test of routines involving modules (subquotients especially) over ZZp
     restart
     loadPackage "FastLinearAlgebra"
+    debug Core
     R = ZZp 101
     N = 1000
     f = random(R^N, R^(N//2));
@@ -623,6 +625,7 @@ TEST ///
 TEST ///
     restart
     loadPackage "FastLinearAlgebra"
+    debug Core
     R = ZZp 101
     f = matrix{{1_R,2},{3,4}}
     g = matrix{{1_R},{1_R}}
@@ -639,6 +642,7 @@ TEST ///
 TEST ///  -- CRASHING TEST 19 Dec 2012 Jakob+Mike    
     restart
     loadPackage "FastLinearAlgebra"
+    debug Core
     R = ZZp 101
 
     N = 700
@@ -649,7 +653,7 @@ TEST ///  -- CRASHING TEST 19 Dec 2012 Jakob+Mike
 ///
 
 TEST ///
-
+    debug Core
     kk = ZZp 101
     R = kk[t]
     M1 = mutableMatrix matrix(kk, {{2, 16, 29}, {-18, 24, 12}, {-41, 7, -31}})
@@ -700,6 +704,7 @@ TEST ///
 ///
 
 TEST ///
+ debug Core
 -- addMultipleTo
     kk = ZZp 101
     M1 = mutableMatrix random(kk^3, kk^5)
@@ -710,6 +715,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
 -- addMultipleTo
     kk = ZZp 67000993
     M1 = mutableMatrix random(kk^3, kk^5)
@@ -720,6 +726,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
 -- addMultipleTo
     kk = ZZp 101
     M1 = mutableMatrix random(kk^300, kk^500);
@@ -731,6 +738,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
 -- addMultipleTo
     kk = ZZp 67000993
     M1 = mutableMatrix random(kk^300, kk^500);
@@ -742,6 +750,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
     kk = ZZp 101;
     A = mutableMatrix matrix(kk, {{23, -35, -29, 33}, {22, 7, -25, 11}})
     B = mutableMatrix matrix(kk, {{-36, -40}, {-15, -43}, {-16, -43}, {15, 32}, {6, -14}})
@@ -755,6 +764,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
     N = 10
     kk = ZZp 101
     time A = mutableMatrix(kk, N, N, Dense=>true);
@@ -768,6 +778,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
   R = ZZp 5
   Rt = R[t]
   jordanBlock = (R, diag, n) -> (
@@ -824,6 +835,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
   kk = ZZp 67108859
   M = mutableMatrix(kk, 10, 10, Dense=>true)
   fillMatrix M
@@ -878,6 +890,7 @@ TEST ///
 ///
 
 TEST ///
+debug Core
     kk = ZZp 101
     M = mutableMatrix(kk,5000,5000);
     N = mutableMatrix(kk,5000,5000);

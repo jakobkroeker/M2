@@ -16,6 +16,10 @@
 static bool maxH_initialized = false;
 static mpz_t maxH;
 
+const int ARingZZpFFPACKTrials = ntrials;
+//const int ARingZZpFFPACKTrials = 1000000;//multdivide fails for ARingRRR
+//const int ARingZZpFFPACKTrials = 100000;
+
 gmp_ZZ getRandomInteger()
 {
   if (!maxH_initialized)
@@ -140,32 +144,33 @@ TEST(ARingZZpFFPACK, create) {
 
 TEST(ARingZZpFFPACK, arithmetic101) {
   M2::ARingZZpFFPACK R(101);
-  testFiniteField(R, ntrials);
+  testFiniteField(R, ARingZZpFFPACKTrials);
 }
 
 //TODO: commented out because it appears wrong.  Perhaps p=2 isn't allowed here?
-//TEST(ARingZZpFFPACK, arithmetic2) {
+//TEST(ARingZZpFFPACK1, arithmetic2) {
 //  M2::ARingZZpFFPACK R(2);
-//  testFiniteField(R);
+//  testFiniteField(R,ARingZZpFFPACKTrials);
 //}
 
 TEST(ARingZZpFFPACK, arithmetic3) {
   M2::ARingZZpFFPACK R(3);
-  testFiniteField(R, ntrials);
+  testFiniteField(R, ARingZZpFFPACKTrials);
 }
+
 
 TEST(ARingZZpFFPACK, arithmetic66000007) {
   M2::ARingZZpFFPACK R(66000007);
 
   testCoercions(R);
-  testNegate(R, ntrials);
-  testAdd(R, ntrials);
-  testSubtract(R, ntrials);
-  testMultiply(R, ntrials);
-  testDivide(R, ntrials);
-  testReciprocal(R, ntrials);
-  testPower(R, ntrials);
-  testAxioms(R, ntrials);
+  testNegate(R, ARingZZpFFPACKTrials);
+  testAdd(R, ARingZZpFFPACKTrials);
+  testSubtract(R, ARingZZpFFPACKTrials);
+  testMultiply(R, ARingZZpFFPACKTrials);
+  testDivide(R, ARingZZpFFPACKTrials);
+  testReciprocal(R, ARingZZpFFPACKTrials);
+  testPower(R, ARingZZpFFPACKTrials);
+  testAxioms(R, ARingZZpFFPACKTrials);
 }
 
 //TODO: commented out because it takes too long:
@@ -174,15 +179,16 @@ TEST(ARingZZpFFPACK, arithmetic67108859) {
   M2::ARingZZpFFPACK R(67108859);
 
   testCoercions(R);
-  testNegate(R, ntrials);
-  testAdd(R, ntrials);
-  testSubtract(R, ntrials);
-  testMultiply(R, ntrials);
-  testDivide(R, ntrials);
-  testReciprocal(R, ntrials);
-  testPower(R, ntrials);
-  testAxioms(R, ntrials);
+  testNegate(R, ARingZZpFFPACKTrials);
+  testAdd(R, ARingZZpFFPACKTrials);
+  testSubtract(R, ARingZZpFFPACKTrials);
+  testMultiply(R, ARingZZpFFPACKTrials);
+  testDivide(R, ARingZZpFFPACKTrials);
+  testReciprocal(R, ARingZZpFFPACKTrials);
+  testPower(R, ARingZZpFFPACKTrials);
+  testAxioms(R, ARingZZpFFPACKTrials);
 }
+
 #endif 
 
 

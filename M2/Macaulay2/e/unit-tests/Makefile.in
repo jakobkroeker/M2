@@ -20,7 +20,7 @@ LDFLAGS += #-coverage
 #    -I../../e-includes
 
 
-LOADLIBES += @BUILTLIBS@ @LIBS@ -lstdc++
+LOADLIBES += @BUILTLIBS@ @LIBS@ -lstdc++ -lgfortran
 #LOADLIBES += -lgc -lstdc++ -lgmp -lmpfr -lflint -lntl -pthread -framework vecLib # -lgivaro -llinbox
 
 .PHONY: place_into_lib runtests

@@ -81,6 +81,37 @@ const Ring /* or null */ *rawARingGaloisField(int prime, int dimension)
             return 0;
         }
      try {
+#if defined(HAVE_FFLAS_FFPACK) 
+
+        if (prime <= 1  )
+        {
+            ERROR("givaroGF/FFPACK: expected a prime number p ");
+            return 0;
+        }
+
+        //-- NEED_POLYNOMIAL_REPRESENTATION is not usable(namespace problems) and is not correct, because the answer depends on the template used for Givaro::GFqDom.
+        /*if (Givaro::NEED_POLYNOMIAL_REPRESENTATION(prime,dimension) )
+        {
+            ERROR("givaro Galois Field: polynomial representation is needed  - todo ");
+            return 0;
+        }*/
+        if (dimension==1 && M2::ARingZZpFFPACK::getMaxModulus()> prime)
+        {
+	      std::cout << "maximum modulus = " << M2::ARingZZpFFPACK::getMaxModulus() << std::endl;
+
+          M2::ARingZZpFFPACK *A = new M2::ARingZZpFFPACK(prime);
+          return M2::ConcreteRing<M2::ARingZZpFFPACK >::create(A);
+        }
+	if (dimension==1)
+	  {
+	    ERROR("maximum modulus = %f\n", M2::ARingZZpFFPACK::getMaxModulus());
+	    return 0;
+	  }
+#else
+       ERROR("add  --enable-givaro when building M2");
+       return 0;
+#endif
+
 #if defined(HAVE_FFLAS_FFPACK) && defined(HAVE_GIVARO)
 
         if (prime <= 1  )
@@ -90,16 +121,17 @@ const Ring /* or null */ *rawARingGaloisField(int prime, int dimension)
         }
 
         //-- NEED_POLYNOMIAL_REPRESENTATION is not usable(namespace problems) and is not correct, because the answer depends on the template used for Givaro::GFqDom.
-        /*if (Givaro::NEED_POLYNOMIAL_REPRESENTATION(prime,dimension) )  
+        /*if (Givaro::NEED_POLYNOMIAL_REPRESENTATION(prime,dimension) )
         {
             ERROR("givaro Galois Field: polynomial representation is needed  - todo ");
             return 0;
         }*/
-        if (dimension==1 && M2::ARingZZpFFPACK::getMaxModulus()> prime) 
+        if (dimension==1 && M2::ARingZZpFFPACK::getMaxModulus()> prime)
         {
-	  std::cout << "maximum modulus = " << M2::ARingZZpFFPACK::getMaxModulus() << std::endl;
+	      std::cout << "maximum modulus = " << M2::ARingZZpFFPACK::getMaxModulus() << std::endl;
+
           M2::ARingZZpFFPACK *A = new M2::ARingZZpFFPACK(prime);
-          return M2::ConcreteRing<M2::ARingZZpFFPACK>::create(A);
+          return M2::ConcreteRing<M2::ARingZZpFFPACK >::create(A);
         }
 	if (dimension==1)
 	  {
@@ -172,13 +204,13 @@ const Ring /* or null */ *rawARingGaloisFieldFromQuotient(const RingElement *a)
       ERROR("expected poly ring of the form ZZ/p[x]/(f)");
       return 0;
     }
-  
+
   if (!R->is_equal(a->get_value(), R->var(0)))
     {
       ERROR("primitive element needs to be the generator of the ring, we think...!");
       return 0;
     }
-  
+
   M2_arrayint modPoly = getPolynomialCoefficients(R, R->quotient_element(0));
   if (modPoly == 0)
     return 0;
@@ -187,7 +219,7 @@ const Ring /* or null */ *rawARingGaloisFieldFromQuotient(const RingElement *a)
   M2_arrayint primitiveElementPoly = getPolynomialCoefficients(R, a->get_value());
   if (primitiveElementPoly == 0)
     return 0;
-    
+
   try {
     M2::ARingGF *A = new M2::ARingGF(R->charac(), modPoly, primitiveElementPoly, *R);
     return M2::ConcreteRing<M2::ARingGF>::create(A);
@@ -297,7 +329,7 @@ const Ring /* or null */ *rawARingTower2(const Ring *R1, M2_ArrayString new_name
 	return NULL;
       }
     const M2::ARingTower &A = K->ring();
-    
+
     std::vector<std::string> new_varnames;
     M2_ArrayString_to_stdvector(new_names, new_varnames);
     const M2::ARingTower *T = M2::ARingTower::create(A, new_varnames);
@@ -321,7 +353,7 @@ const Ring /* or null */ *rawARingTower3(const Ring *R1, engine_RawRingElementAr
     const M2::ARingTower &A = K->ring();
 
     std::vector<M2::ARingTower::ElementType> extensions;
-    
+
     for (int i=0; i<eqns->len; i++)
       {
         const RingElement *f = eqns->array[i];

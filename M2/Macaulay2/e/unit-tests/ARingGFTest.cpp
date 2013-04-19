@@ -48,6 +48,7 @@ void getElement<M2::ARingGF>(const M2::ARingGF& R,
 }
 
   TEST(ARingGFGivaro, create) {
+    M2::ARingGF RR(7,2);
     M2::ARingGF R(5,3);
       
     EXPECT_EQ(ringName(R), "GF(5,3,Givaro)");

@@ -28,5 +28,28 @@ namespace M2 {
       o.put(s->array, s->len);
     
   }
+void ARingRRR::elem_text_out(std::ostream &o,
+			       ElementType &ap,
+			       bool p_one,
+			       bool p_plus,
+			       bool p_parens) const
+  {
+    mpfr_ptr a = &ap;
+    M2_string s = (*gmp_tostringRRpointer)(a);
+    bool prepend_plus = p_plus && (s->array[0] != '-');
+    bool strip_last = !p_one && (
+				 (s->len == 1 && s->array[0] == '1')
+				 || (s->len == 2 && s->array[1] == '1' && s->array[0] == '-'));
+    
+    if (prepend_plus)
+      o << "+";
+    for (int i = 0 ; i<s->len ;i++)
+    {
+      o << s->array [ i ];
+    }
+    if (! strip_last)
+     o << s->array[ s->len - 1 ];
+  }
+
   
 }

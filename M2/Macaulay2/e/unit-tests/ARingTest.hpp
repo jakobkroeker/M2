@@ -1,7 +1,8 @@
 #ifndef __ring_test_hpp__
 #define __ring_test_hpp__
 
-const int ntrials = 1000;
+const int ntrials = 100000;
+//const int ntrials = 10; //should be parametrizable.
 
 template <typename RingType>
 void getElement(const RingType& R, int index, typename RingType::ElementType &result);

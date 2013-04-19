@@ -194,6 +194,13 @@ namespace M2 {
                        bool p_one,
                        bool p_plus,
                        bool p_parens) const;
+
+ void elem_text_out(std::ostream &o,
+                        ElementType &a,
+                       bool p_one,
+                       bool p_plus,
+                       bool p_parens) const;
+
       //TODO
 
     void syzygy(ElementType a, ElementType b,

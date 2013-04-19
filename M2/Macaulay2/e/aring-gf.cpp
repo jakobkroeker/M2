@@ -24,6 +24,15 @@ namespace M2 {
       givaroField(FieldType(charact_, extensionDegree_)),
       givaroRandomIterator( FieldType::randIter(givaroField ))     
     {
+
+           FieldType::randIter     gri(givaroField);
+ 
+           std::cerr << "gri" << &gri << std::endl;
+
+           FieldType ft(charact_, extensionDegree_);
+
+           std::cerr << "ft" << &ft << std::endl;
+
            mCardinality = mCharac;
            for (int j=1; j<mDimension; j++)
                mCardinality *= mCharac;
@@ -32,7 +41,9 @@ namespace M2 {
             /// debug code:
             getModPolynomialCoeffs();
             getGeneratorCoeffs();
-
+            std::cerr << "charact_"<<charact_ << std::endl;
+            std::cerr << "extensionDegree_"<<extensionDegree_ << std::endl;
+	
            /*
           
             ARingGF *testGF = new ARingGF(charact_, getModPolynomialCoeffs() );

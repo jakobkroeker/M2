@@ -9,25 +9,26 @@
 #include <iostream>
 
 //enable this lines to trick Kdevelop and do not forget to comment out them before committing. Other ideas ?
-// #define HAVE_FFLAS_FFPACK 1 
+// #define HAVE_FFLAS_FFPACK 1
 // #define HAVE_GIVARO 1
 
-#if not defined(HAVE_FFLAS_FFPACK)  
+#if not defined(HAVE_FFLAS_FFPACK)
 namespace M2 {
-  
+
   class ARingZZpFFPACK : public DummyRing
   {
   public:
     static const RingID ringID = ring_FFPACK;
-    
+
     typedef M2::ARingZZpFFPACK   ring_type;
-    
+
     ARingZZpFFPACK(int charac) {}
   };
-  
+
 };
 #else
 #include <fflas-ffpack/field/modular-balanced.h>
+#include <fflas-ffpack/field/modular-double.h>
 #include <fflas-ffpack/ffpack/ffpack.h>
 //#include <givaro/givgfq.h>
 
@@ -35,10 +36,30 @@ namespace M2 {
 
   /**
      @ingroup rings
-     
+
      @brief wrapper for the FFPACK::ModularBalanced<double> field implementation
   */
-  
+
+  // @jakob if we really want to chose field type dynamically, depending on field char
+  // we will need something like an interface (implemented with some tricks)
+  // or we will need the auto keyword.
+  //
+
+  template < int fieldTypeBalanced>
+  class FieldTypeChoice
+  {
+       public:
+            typedef FFPACK::ModularBalanced<double> FieldType;
+  };
+
+  template < >
+  class FieldTypeChoice<2>
+  {
+       public:
+            typedef FFPACK::Modular<double> FieldType;
+  };
+
+  //template <int fieldTypeBalanced=0>
   class ARingZZpFFPACK : public RingInterface
   {
   public:
@@ -47,8 +68,11 @@ namespace M2 {
     // Also: whatever we call them, we want all aring classes to use them.
     // problem: givaro isn't necessarily defined here
     static const RingID ringID = ring_FFPACK;
-    
+
     typedef FFPACK::ModularBalanced<double> FieldType;
+    //typedef typename FieldTypeChoice<fieldTypeBalanced>::FieldType FieldType;
+    //typedef FFPACK::Modular<double> FieldType;
+
 
     typedef FieldType::Element ElementType;
     typedef ElementType elem;
@@ -61,7 +85,7 @@ namespace M2 {
     // if no givaro, use this:
     //typedef  int32_t STT; /// attention: depends on UTT; currently manual update
 
-    // @todo: problem, wenn typ von cHarakteristif 
+    // @todo: problem, wenn typ von cHarakteristif
     ARingZZpFFPACK(UTT charac);
 
   public:
@@ -85,24 +109,24 @@ namespace M2 {
     // @TODO: Jakob: what are the implications of using /// instead of /**.
 
   /** @name IO
-  @{ 
+  @{
   */
     void text_out(buffer &o) const { o << "ZZpFPACK(" << mCharac << "," << mDimension << ")"; }
 
     void elem_text_out
             (
-              buffer &o, 
+              buffer &o,
               const  ElementType a,
-              bool p_one=true, 
-              bool p_plus=false, 
+              bool p_one=true,
+              bool p_plus=false,
               bool p_parens=false
             ) const;
   /** @} */
 
   /** @name properties
-  @{     
+  @{
   */
-        
+
     bool is_unit(const ElementType f) const ;
     bool is_zero(const ElementType f) const ;
 
@@ -118,7 +142,7 @@ namespace M2 {
       // so that the coercion to an int will be correct.
       result.int_val = static_cast<int>(a);
     }
-    
+
     void from_ring_elem(ElementType &result, const ring_elem &a) const
     {
       result = a.int_val;
@@ -137,55 +161,55 @@ namespace M2 {
   @{ */
 
     void init_set(ElementType &result, ElementType a) const { result = a; }
-    
+
     void set(ElementType &result, ElementType a) const { result = a; }
-    
+
     void init(ElementType &result) const ;
-    
+
     void clear(ElementType &result) const ;
-    
+
     void set_zero(ElementType &result) const ;
-    
+
     void copy(ElementType &result,const ElementType a) const ;
-    
+
     void set_from_int(ElementType &result, int a) const ;
-    
+
     void set_from_mpz(ElementType &result,const mpz_ptr a) const ;
-    
+
     void set_from_mpq(ElementType &result,const mpq_ptr a) const ;
-    
+
     bool set_from_BigReal(ElementType &result, gmp_RR a) const { return false; }
-    
-    ElementType computeGenerator ( ) const; 
-    
+
+    ElementType computeGenerator ( ) const;
+
     void set_var(ElementType &result, int v) const         { result = getGenerator(); }
-    
+
   /** @} */
 
 
   /** @name arithmetic
   @{ */
     void negate(ElementType &result,const ElementType a) const;
-    
+
     void invert(ElementType &result,const ElementType a) const;
 
     void unsafeInvert(ElementType &result, const ElementType a) const;
-    
+
     void add(ElementType &result, const ElementType a,const ElementType b) const;
-    
+
     void subtract(ElementType &result,const  ElementType a,const  ElementType b) const;
-    
+
     void subtract_multiple(ElementType &result,const  ElementType a,const  ElementType b) const;
-    
+
     void mult(ElementType &result,const  ElementType a,const  ElementType b) const;
-    
+
   ///@brief test doc
     void divide(ElementType &result,const  ElementType a,const  ElementType b) const;
-    
+
     void power(ElementType &result,const  ElementType a,const  STT n) const;
-    
+
     void power_mpz(ElementType &result,const  ElementType a,const  mpz_ptr n) const;
-    
+
     void syzygy(const ElementType a, const ElementType b,
                 ElementType &x, ElementType &y) const;
   /** @} */
@@ -194,21 +218,21 @@ namespace M2 {
   /** @name misc
   @{ */
     void swap(ElementType &a, ElementType &b) const;
-    
+
     void random(ElementType &result) const;
 
-    //TODO: Mike.  If possible, move promote, lift, eval to 
+    //TODO: Mike.  If possible, move promote, lift, eval to
     // their own classes, or templated functions
     bool promote(const Ring *Rf, const ring_elem f, ElementType &result) const;
-    
+
     bool lift(const Ring *Rg, const ElementType f, ring_elem &result) const;
-    
+
     // map : this --> target(map)
     //       primelem --> map->elem(first_var)
     // evaluate map(f)
     void eval(const RingMap *map, const ElementType f, int first_var, ring_elem &result) const;
-    
-    static inline double getMaxModulus() 
+
+    static inline double getMaxModulus()
     {
       return FieldType::getMaxModulus();
     }
@@ -217,11 +241,11 @@ namespace M2 {
   private:
     const FieldType mFfpackField;
     mutable FieldType::RandIter   mFfpackRandomIterator;
-    
+
     UTT mCharac;
     UTT mDimension; ///< same as extensionDegree
-    
-    /// use getGenerator() to access it since generator is cached and not 
+
+    /// use getGenerator() to access it since generator is cached and not
     /// computed if not required.
     mutable ElementType mGenerator;
 

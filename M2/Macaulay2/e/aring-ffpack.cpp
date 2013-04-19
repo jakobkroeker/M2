@@ -10,7 +10,7 @@
 
 namespace M2 {
 
-  ARingZZpFFPACK::ARingZZpFFPACK(UTT charact)  :   
+  ARingZZpFFPACK::ARingZZpFFPACK(UTT charact)  :
     mFfpackField          (FieldType(static_cast<double>(charact))),
     mFfpackRandomIterator (mFfpackField),
     mCharac               (charact),
@@ -19,12 +19,12 @@ namespace M2 {
   {
     M2_ASSERT( FieldType::getMaxModulus()>=mCharac );
   }
- 
+
   void ARingZZpFFPACK::elem_text_out
-          ( buffer &o, 
-            const ElementType elem, 
-            bool print_one, 
-            bool print_plus, 
+          ( buffer &o,
+            const ElementType elem,
+            bool print_one,
+            bool print_plus,
             bool print_parens
           ) const
   {
@@ -52,60 +52,60 @@ namespace M2 {
             if (is_equal(currElem, tmpElem))
               found = false;
           }
-        if (found) 
+        if (found)
           {
             std::cerr << "generator = " << currElem << std::endl;
             return currElem;
           }
       }
     M2_ASSERT(false); // we should not get here, if the program logic is OK
-    return ElementType(1);    
+    return ElementType(1);
   }
-        
+
   bool ARingZZpFFPACK::is_unit(const ElementType f) const
-  {   
-    return not mFfpackField.isZero(f); 
+  {
+    return not mFfpackField.isZero(f);
   }
-  
+
   bool ARingZZpFFPACK::is_zero(const ElementType f) const
-  {   
+  {
     return mFfpackField.isZero(f);
   }
 
   bool ARingZZpFFPACK::is_equal(const ElementType f, const ElementType g) const
-  {   
+  {
     return mFfpackField.areEqual(f, g);
   }
 
-  /// compare exponents of the used generator 
+  /// compare exponents of the used generator
   /// @return -1: f < g, 1: f>g; 0: f==g;
-  int ARingZZpFFPACK::compare_elems(const ElementType f, const ElementType g) const 
+  int ARingZZpFFPACK::compare_elems(const ElementType f, const ElementType g) const
   {
-    if (f < g) return -1; 
+    if (f < g) return -1;
     if (f > g) return 1;
-    
+
     return 0;
   }
 
   // 'init', 'init_set' functions
 
   void ARingZZpFFPACK::init(ElementType &result) const
-  { 
+  {
     //    M2_ASSERT(0 == mFfpackField.zero);
     result = 0;
-  } 
+  }
 
   void ARingZZpFFPACK::clear(ElementType &result) const
-  { 
+  {
     /* nothing */
-  }
-  
+  }  
+
   void ARingZZpFFPACK::set_zero(ElementType &result) const
-  { 
+  {
     // M2_ASSERT(0 == mFfpackField.zero);
     result = 0;
   }
-  
+
   void ARingZZpFFPACK::copy(ElementType &result, const ElementType a) const
   {
     result = a;
@@ -114,18 +114,18 @@ namespace M2 {
   /// @todo possible problem if type UTT is smaller than an int?
   void ARingZZpFFPACK::set_from_int(ElementType &result, int a) const
   {
-    mFfpackField.init(result, a);
+    mFfpackField.init(result, static_cast<long>(a) );
   }
-  
+
   void ARingZZpFFPACK::set_from_mpz(ElementType &result, const mpz_ptr a) const
   {
     UTT b = static_cast<UTT>(mpz_fdiv_ui(a, mCharac));
-    mFfpackField.init(result,  b);
+    mFfpackField.init(result,  static_cast<long>(b) );
   }
-  
+
   /// @Mike: change all uses of set_from_mpq to return bool
   //  or, perhaps, to raise an exception.
-  void ARingZZpFFPACK::set_from_mpq(ElementType &result, const mpq_ptr a) const 
+  void ARingZZpFFPACK::set_from_mpq(ElementType &result, const mpq_ptr a) const
   {
     ElementType n, d;
     set_from_mpz(n, mpq_numref(a));
@@ -158,12 +158,12 @@ namespace M2 {
   {
     mFfpackField.add(result, a, b);
   }
-  
+
   void ARingZZpFFPACK::subtract(ElementType &result, const ElementType a, const ElementType b) const
   {
     mFfpackField.sub(result, a, b);
   }
-  
+
   /// @param c[in][out] c = c - a*b
   void ARingZZpFFPACK::subtract_multiple(ElementType &c, const ElementType a, const ElementType b) const
   {
@@ -171,12 +171,12 @@ namespace M2 {
     mFfpackField.negin(nega);
     mFfpackField.axpyin(c, nega, b);
   }
-  
+
   void ARingZZpFFPACK::mult(ElementType &result, const ElementType a, const ElementType b) const
   {
     mFfpackField.mul(result, a, b);
   }
-  
+
   void ARingZZpFFPACK::divide(ElementType &result, const ElementType a, const ElementType b) const
   {
     if ( mFfpackField.isZero(b))
@@ -188,7 +188,7 @@ namespace M2 {
   {
     if (is_zero(a))
       {
-        if (n < 0) 
+        if (n < 0)
           ERROR("division by zero");
         set(result, a);
         return;
@@ -218,14 +218,14 @@ namespace M2 {
           mFfpackField.mulin(base, base); // base = base^2
       }
   }
-  
+
   /// @pre ensure that  mFfpackField.cardinality() fits in a unsigned long, otherwise instead of mpz_fdiv_ui a different function has to be called)
   void ARingZZpFFPACK::power_mpz(ElementType &result, const  ElementType a, const  mpz_ptr n) const
   {
     STT n1 = static_cast< STT>(mpz_fdiv_ui(n, mFfpackField.cardinality()-1));
     power(result,a,n1);
   }
-  
+
   ///@note duplicate code
   void ARingZZpFFPACK::swap(ElementType &a, ElementType &b) const
   {
@@ -233,16 +233,16 @@ namespace M2 {
     a = b;
     b = tmp;
   }
-  
+
   /** @brief returns x,y  s.y.  x*a + y*b == 0.
       if possible, x is set to 1.
       no need to consider the case a==0 or b==0.
   */
-  
+
   void ARingZZpFFPACK::syzygy
-      ( const ElementType a, 
+      ( const ElementType a,
         const ElementType b,
-        ElementType &x, 
+        ElementType &x,
         ElementType &y) const
   {
     // x = mFfpackField.one;
@@ -250,24 +250,24 @@ namespace M2 {
     divide(y,a,b);
     negate(y,y);
   }
-  
+
   /// @jakob: document possible overflow and other nasty things
   void ARingZZpFFPACK::random(ElementType &result) const
   {
     mFfpackRandomIterator.random(result);
   }
-  
+
   void ARingZZpFFPACK::eval
-        ( const RingMap *map, 
-          const ElementType f, 
+        ( const RingMap *map,
+          const ElementType f,
           int first_var, // not used here. See ringmap.cpp
           ring_elem &result) const
   {
     // translate f to map->target()
-    int a = static_cast<int>(f);  
+    int a = static_cast<int>(f);
     result = map->get_ring()->from_int(a);
   }
-  
+
 };
 
 #endif

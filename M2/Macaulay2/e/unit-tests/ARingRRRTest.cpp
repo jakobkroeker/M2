@@ -22,6 +22,13 @@ bool almostEqual(const M2::ARingRRR& R, int nbits, const M2::ARingRRR::ElementTy
   R.subtract(c,a,b);
   bool ret =  mpfr_cmpabs(&c,epsilon) < 0;
 
+  if (not ret )
+  {
+      R.elem_text_out(std::cout, const_cast<M2::ARingRRR::ElementType&>(a), true,true,true);
+      R.elem_text_out(std::cout, const_cast<M2::ARingRRR::ElementType&>(b), true,true,true);
+      R.elem_text_out(std::cout, const_cast<M2::ARingRRR::ElementType&>(c), true,true,true);
+  }
+
   R.clear(c);
   mpfr_clear(epsilon);
   return ret;
