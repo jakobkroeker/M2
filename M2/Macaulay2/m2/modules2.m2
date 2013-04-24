@@ -183,7 +183,9 @@ hilbertFunction(List,Ring) := (d,R) -> hilbertFunction(d,R^1)
 hilbertFunction(List,Ideal) := hilbertFunction(List,Module) := (d,M) -> (
      if not all(d,i->class i === ZZ) then error "expected degree to be an integer or list of integers";
      if degreeLength M =!= #d then error "degree length mismatch";
-     f := hilbertSeries(M, Order => 1 + sum((options ring M).Heft,d,times));
+     h := (options ring M).Heft;
+     if h === null then error "hilbertFunction: ring has no heft vector";
+     f := hilbertSeries(M, Order => 1 + sum(h,d,times));
      U := monoid ring f;
      coefficient(U_d,f))
 
@@ -796,21 +798,6 @@ truncate(List,Module) := Module => (deg,M) -> (
 truncate(List,Ideal) := Ideal => (deg,I) -> ideal truncate(deg,module I)
 truncate(ZZ,Module) := Module => (deg,M) -> truncate({deg},M)
 truncate(ZZ,Ideal) := Ideal => (deg,I) -> truncate({deg},I)
-truncate(ZZ,ZZ,Matrix) := Matrix => (j,i,f) -> (
-     -- this function was written by David Eisenbud
-     --truncate source at i and target at j, and produce the map
-     --between the truncated modules
-     --notation: f: M --> M'
-     tM := truncate(i, source f);
-     tM' := truncate(j,target f);
-     if i<j then return map(tM',tM,0);
-     inc := inducedMap(source f,tM);
-     inc':= inducedMap(target f, tM');
-     map(tM', tM, f*inc//inc')
-     )
-truncate(ZZ, Matrix) := Matrix => (i,f)-> (
-     -- this function was written by David Eisenbud
-     truncate(i,i,f))
 -----------------------------------------------------------------------------
 isSubset(Module,Module) := (M,N) -> (
      -- here is where we could use gb of a subquotient!
