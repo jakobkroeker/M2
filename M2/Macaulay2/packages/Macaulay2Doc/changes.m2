@@ -93,12 +93,24 @@ document {
 		    LI { TO "Triplets::Triplets", ", a package for computing Betti diagrams and hypercohomology tables associated to triplets of degree sequences,
 			 has been added." 
 			 },
+		    LI { TO "CompleteIntersectionResolutions::CompleteIntersectionResolutions", ", a package for analyzing the asymptotic
+			 structure of minimal resolutions over a complete intersection, has been added."
+			 },
 	  	    }
 	       },
-	  -- LI { "improved packages:",
-	  --      UL {
-	  --      	    }
-	  --      },
+	  LI { "improved packages:",
+	       UL {
+     	       	    LI { "The package ", TO "GraphicalModels::GraphicalModels", " has been extended significantly by its authors.
+			 The previous version of this package was simply a basic extension of the package ", TO "Markov::Markov", ".
+			 Among the new algorithms implemented are procedures for computing the vanishing ideal of a graphical model 
+			 and for checking for identifiable parameters in Gaussian mixed graph models. These procedures can be used 
+			 to study fundamental problems about graphical models."
+			 },
+		    LI { "The package ", TO "Schubert2::Schubert2", " now handles intersection rings of ", EM "isotropic", " flag bundles,
+			 with an algorithm based on a theorem in a paper of Grayson, Seceleanu, and Stillman."
+			 },
+	       	    }
+	       },
 	  LI { "functionality added or improved:",
 	       UL {
 	       	    LI { "Factoring of polynomials over non-prime Galois fields has been added, using the ", TO "Singular-Factory", " library." },
@@ -183,7 +195,7 @@ document {
 			 TO "RandomCanonicalCurves::RandomCanonicalCurves", ", ",
 			 TO "RandomCurves::RandomCurves", ", ",
 			 TO "RandomGenus14Curves::RandomGenus14Curves", ", ",
-			 TO "RandomPlaneCurves::RandomPlaneCurves", ", ",
+			 TO "RandomPlaneCurves::RandomPlaneCurves", ", and ",
 			 TO "RandomSpaceCurves::RandomSpaceCurves", ", packages for the construction of random points of unirational moduli spaces,
 			 have been added." },
 		    LI { TO "TensorComplexes::TensorComplexes", ", a package for multilinear algebra for the construction of tensor complexes,

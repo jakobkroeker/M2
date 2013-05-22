@@ -7,7 +7,7 @@ newPackage(
 		  Email => "boehm@math.uni-sb.de", 
 		  HomePage => "http://www.math.uni-sb.de/ag/schreyer/jb/"}},
     	Headline => "Adjoint ideals of plane curves and related computations",
-    	DebuggingMode => true,
+    	DebuggingMode => false,
 	CacheExampleOutput => true,
 	AuxiliaryFiles => true
     	)
@@ -625,9 +625,9 @@ beginDocumentation()
 
 doc ///
   Key
-    "AdjointIdeal"
+    AdjointIdeal
   Headline
-    "Adjoint ideal of a plane curve and related computations"
+    Adjoint ideal of a plane curve and related computations
   Description
    Text
 

@@ -13,14 +13,19 @@ DEBUG = no
 ifeq ($(PRODUCTION),yes)
 CONFIGOPTIONS += --disable-common-staging-area
 DIRECTORY = cygwin.production
+CONFIGOPTIONS += --enable-cygwin
 else
 DIRECTORY = cygwin
+endif
+
+ifeq ($(DEBUG),yes)
+INSTALLOPTIONS += prefix=/none
+CONFIGOPTIONS += --enable-debug
 endif
 
 # to install packages use the setup program
 # see ../../INSTALL for the list of packages to install
 
-CONFIGOPTIONS += --enable-cygwin
 CONFIGOPTIONS += --build=i486-pc-cygwin
 # BUILDOPTIONS += RemakePackages=true RemakeAllDocumentation=true
 # INSTALLOPTIONS += prefix=/usr/local/encap
@@ -30,5 +35,5 @@ default: check
 pre-install:;	rm -rf /usr/local/encap/Macaulay2-$(PACKAGE_VERSION)
 arch-chk:; [ `uname -o` = Cygwin  ] && [ `uname -m` = i686 ]
 # Local Variables:
-# compile-command: "time make -f Makefile.cygwin DISTRIBUTION=1 rebuild-world cygwin-signature "
+# compile-command: "time make -f Makefile.cygwin DISTRIBUTION=1 PRODUCTION=yes DEBUG=no rebuild-world cygwin-signature "
 # End:

@@ -9,7 +9,7 @@ newPackage(
 	     {Name => "Stein A. Strømme", Email => "stromme@math.uib.no"}
 	     },
     	Headline => "computing with sets of points",
-    	DebuggingMode => true
+    	DebuggingMode => false
     	)
 
 export {
@@ -200,6 +200,7 @@ beginDocumentation()
 
 document {
      Key => Points,
+     Headline => "computing with sets of points",
      "A package to compute with points in affine and projective spaces",
      {*
      Subnodes => {
