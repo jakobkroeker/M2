@@ -21,7 +21,7 @@ bool RRR::initialize_RRR(unsigned long prec)
   initialize_ring(0);
   declare_field();
   precision = prec;
-  _elem_size = sizeof(mpfr_t);
+  _elem_size = static_cast<int>(sizeof(mpfr_t));
   _zero_elem = new_elem();
 
   zeroV = from_int(0);
@@ -49,6 +49,12 @@ mpfr_ptr RRR::new_elem() const
   mpfr_ptr result = getmemstructtype(mpfr_ptr);
   mpfr_init2(result,precision);
   return result;
+}
+
+unsigned long RRR::compute_hash_value(const ring_elem a) const
+{
+  double b = mpfr_get_d(MPF_VAL(a), GMP_RNDN);
+  return static_cast<unsigned long>(12347.*b);
 }
 
 ring_elem RRR::random() const

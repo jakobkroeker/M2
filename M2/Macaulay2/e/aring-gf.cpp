@@ -274,7 +274,7 @@ M2_arrayint ARingGF::representationToM2Array(UTT representation,  long coeffNum,
 #ifdef DEBUG_GF
     std::cerr << "representationToM2Array:\n";
 #endif
-    M2_arrayint     polynomialCoeffs = M2_makearrayint(coeffNum);
+    M2_arrayint     polynomialCoeffs = M2_makearrayint(static_cast<int>(coeffNum));
 #ifdef DEBUG_GF
     std::cerr << "coeffNum" << coeffNum << std::endl;
     std::cerr << "charac" << charac << std::endl;
@@ -289,7 +289,7 @@ M2_arrayint ARingGF::representationToM2Array(UTT representation,  long coeffNum,
         assert(exp < coeffNum);
         UTT  remainder = representation%charac;
         representation = representation/charac;
-        polynomialCoeffs->array[ exp ]= remainder;
+        polynomialCoeffs->array[ exp ]= static_cast<int>(remainder);
 
 #ifdef DEBUG_GF        
         //debug:
@@ -344,11 +344,8 @@ M2_arrayint ARingGF::getModPolynomialCoeffs() const
 #ifdef DEBUG_GF
     std::cerr << "getModPolynomialCoeffs\n";
 #endif
-    long coeffNum=this->mDimension + 1;
-    M2_arrayint     modPolynomialCoeffs = M2_makearrayint(coeffNum);
     UTT             modPolynomialRepresentation = this->givaroField.irreducible();
     return modPolynomialRepresentationToM2Array( modPolynomialRepresentation );
-
 } 
 
 M2_arrayint ARingGF::getGeneratorCoeffs() const
@@ -356,8 +353,6 @@ M2_arrayint ARingGF::getGeneratorCoeffs() const
 #ifdef DEBUG_GF
     std::cerr << "getGeneratorCoeffs\n";
 #endif
-    long coeffNum = this->mDimension + 1;
-    M2_arrayint     generatorPolynomialCoeffs = M2_makearrayint(coeffNum);
     ElementType genRep,packedGenPolynomial; ///todo: typ (gen) eigentlich UTT?
     givaroField.generator(genRep);
     packedGenPolynomial = givaroField.generator();
@@ -431,7 +426,7 @@ int ARingGF::get_int(const ElementType f) const
     std::cerr << "ARingGF::get_int" << std::endl;
 #endif
     assert(false);
-    return f; 
+    return 0;
 }
 
 
@@ -461,14 +456,18 @@ int ARingGF::get_repr(const ElementType f) const
     /// @todo possible problem if type UTT is smaller than an int?
     void ARingGF::set_from_int(ElementType &result, int a) const 
     {
+#warning "fix the casting spaghetti here!"
       //std::cerr << "ARingGF::set_from_int" << std::endl;
-      a = a % static_cast<long>(mCharac); // strange: if mCharac isn't cast away from unsigned, 
+      ElementType p = static_cast<ElementType>(mCharac);
+      ElementType a1 = (a >= 0 ? static_cast<ElementType>(a) : static_cast<ElementType>(a + p));
+      a1 = a1 % p;
+      //      a = a % static_cast<long>(mCharac); // strange: if mCharac isn't cast away from unsigned, 
                                           // then a is coerced to unsigned, and get the wrong answer!
       // e.g:
       //  (-5) % (unsigned long)(5) == 1
       //  (-5) % (long)(5) == 0.  Wow!
-
-      if (a < 0) a += mCharac;
+//REmoved, since we are now making it non-negative earlier (28 April 2013)
+//if (a < 0) a += mCharac;
       givaroField.init(result, a);
     }
 
@@ -670,7 +669,15 @@ extern const M2_arrayint getPolynomialCoefficients(const PolynomialRing *R, cons
       result = mOriginalRing->from_int(1);
     else
       {
-        result = mOriginalRing->power(mPrimitiveElement, f);
+#warning "This call to power might be incorrect.  Jakob: please look at it"
+        // For this code here to work, we need to compute 
+        // If f is (zeta)^a, where zeta is the primitive element, then
+        // we want here:
+        //   mPrimitiveElement^a
+        // Also: want to insure that mPrimitiveElement is the same element as zeta!
+        // (And the defining polynomials are the same too).
+        // TODO: add tests and M2_ASSERT's for all of these conditions
+        result = mOriginalRing->power(mPrimitiveElement, static_cast<int>(f));
       }
     
     return true;
@@ -678,7 +685,8 @@ extern const M2_arrayint getPolynomialCoefficients(const PolynomialRing *R, cons
 
   void ARingGF::eval(const RingMap *map, const elem f, int first_var, ring_elem &result) const
   {
-    result = map->get_ring()->power(map->elem(first_var), f);
+    ring_elem a(reinterpret_cast<Nterm*>(f));
+    result = map->get_ring()->power(map->elem(first_var), a);
   }
 
 };

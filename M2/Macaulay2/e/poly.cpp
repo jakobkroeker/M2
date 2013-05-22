@@ -55,7 +55,8 @@ void PolyRing::make_trivial_ZZ_poly_ring()
 {
   if (trivial_poly_ring != 0) return;
 
-  globalZZ = new RingZZ;
+  //  globalZZ = new RingZZ;
+  globalZZ = makeIntegerRing();
   Monoid *M = Monoid::get_trivial_monoid();
   trivial_poly_ring = new PolyRing();
 
@@ -218,7 +219,8 @@ bool PolyRing::from_BigComplex(gmp_CC z, ring_elem &result) const
     }
   if (K_->is_zero(a))
     {
-      return ZERO_RINGELEM;
+      result = ZERO_RINGELEM;
+      return true;
     }
   Nterm *result1 = new_term();
   result1->coeff = a;
@@ -238,7 +240,8 @@ bool PolyRing::from_BigReal(gmp_RR z, ring_elem &result) const
     }
   if (K_->is_zero(a))
     {
-      return ZERO_RINGELEM;
+      result = ZERO_RINGELEM;
+      return true;
     }
   Nterm *result1 = new_term();
   result1->coeff = a;

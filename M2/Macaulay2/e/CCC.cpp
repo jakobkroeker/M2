@@ -15,7 +15,7 @@ bool CCC::initialize_CCC(unsigned long prec)
   initialize_ring(0);
   declare_field();
   precision = prec;
-  _elem_size = sizeofstructtype(gmp_CC);
+  _elem_size = static_cast<int>(sizeofstructtype(gmp_CC));
   _zero_elem = new_elem();
 
   zeroV = from_int(0);
@@ -51,6 +51,14 @@ void CCC::remove_elem(gmp_CC f) const
 {
   // mpfr_clear(f);
 }
+
+unsigned long CCC::compute_hash_value(const ring_elem f) const
+{
+  double a = mpfr_get_d(BIGCC_RE(f), GMP_RNDN);
+  double b = mpfr_get_d(BIGCC_IM(f), GMP_RNDN);
+  return static_cast<unsigned long>(12347.*a + 865800. * b);
+}
+
 
 ring_elem CCC::random() const
 {

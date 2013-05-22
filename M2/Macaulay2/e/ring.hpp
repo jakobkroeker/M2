@@ -210,6 +210,8 @@ public:
   //////////////////////
   // Ring arithmetic ///
   //////////////////////
+  virtual unsigned long compute_hash_value(const ring_elem a) const = 0;
+
   virtual int coerce_to_int(ring_elem a) const;
 
   ring_elem one() const { return oneV; }
@@ -467,8 +469,9 @@ public:
 #define ZERO_RINGELEM (ring_elem(static_cast<Nterm *>(0)))
 
 #include "ZZ.hpp"
-extern RingZZ *globalZZ;
-extern QQ *globalQQ;
+extern RingZZ* globalZZ;
+extern RingZZ* makeIntegerRing();
+extern QQ* globalQQ;
 #endif
 
 // Local Variables:

@@ -349,6 +349,7 @@ void SMat<CoeffRing>::vec_row_op(sparsevec *&v, size_t r1, const elem &a, size_t
       }
   if (vec2 == 0) return;
   elem c;
+  ring().init(c);
   ring().set_zero(c);
   ring().mult(c, vec2->coeff, a);
   if (ring().is_zero(c)) return; // nothing to change
@@ -379,6 +380,7 @@ void SMat<CoeffRing>::vec_row_op(sparsevec *&v, size_t r1, const elem &a, size_t
         }
     }
   v = head.next;
+  ring().clear(c);
 }
 
 template<typename CoeffRing>
@@ -393,10 +395,18 @@ void SMat<CoeffRing>::vec_row_op2(sparsevec *&v,
   // v[row r2] = b1 * v[r1] + b2 * v[r2]
   elem e1,e2, c1,c2,c3,c4;
 
+  ring().init(c1);
+  ring().init(c2);
+  ring().init(c3);
+  ring().init(c4);
+  ring().init(e1);
+  ring().init(e2);
   ring().set_zero(c1);
   ring().set_zero(c2);
   ring().set_zero(c3);
   ring().set_zero(c4);
+  ring().set_zero(e1);
+  ring().set_zero(e2);
   bool r1_nonzero = vec_get_entry(v,r1,e1);
   bool r2_nonzero = vec_get_entry(v,r2,e2);
   if (!r1_nonzero && !r2_nonzero) return;
@@ -416,6 +426,12 @@ void SMat<CoeffRing>::vec_row_op2(sparsevec *&v,
   ring().add(c3,c3,c4);
   vec_set_entry(v,r1,c1);
   vec_set_entry(v,r2,c3);
+  ring().clear(c1);
+  ring().clear(c2);
+  ring().clear(c3);
+  ring().clear(c4);
+  ring().clear(e1);
+  ring().clear(e2);
 }
 
 template<typename CoeffRing>
@@ -431,6 +447,7 @@ template<typename CoeffRing>
 void SMat<CoeffRing>::vec_dot_product(sparsevec *v, sparsevec *w, elem &result) const
 {
   elem a;
+  ring().init(a);
   ring().set_zero(a);
   ring().set_zero(result);
   while (true)
@@ -448,6 +465,7 @@ void SMat<CoeffRing>::vec_dot_product(sparsevec *v, sparsevec *w, elem &result) 
           w = w->next;
         }
     }
+  ring().clear(a);
 }
 
 template<typename CoeffRing>
@@ -907,7 +925,7 @@ void SMat<CoeffRing>::setFromSubmatrix(const SMat &A, M2_arrayint rows, M2_array
     for (size_t c=0; c<cols->len; c++)
       {
         elem f;
-        //coeffR->init(f);
+        coeffR->init(f);
         A.get_entry(rows->array[r],cols->array[c],f);
         set_entry(r,c,f);
       }
@@ -923,6 +941,7 @@ void SMat<CoeffRing>::setFromSubmatrix(const SMat &A, M2_arrayint cols)
     for (size_t c=0; c<cols->len; c++)
       {
         elem f;
+        coeffR->init(f);
         //        coeffR->init(f);
         A.get_entry(r,cols->array[c],f);
         set_entry(r,c,f);
@@ -978,39 +997,6 @@ void SMat<CoeffRing>::scalarMultInPlace(const elem &f)
     vec_scale(columns_[c], f);
 }
 
-template <typename CoeffRing>
-SMat<CoeffRing> * SMat<CoeffRing>::mult(const MutableMatrix *B) const
-  // return this * B.  return NULL of sizes or types do not match.
-  // note: can mult a sparse + dense
-  //       can mult a matrix over RR and one over CC and/or one over ZZ.
-{
-#ifdef DEVELOPMENT
-#warning "to be written"
-#endif
-  return 0;
-}
-
-template <typename CoeffRing>
-SMat<CoeffRing> * SMat<CoeffRing>::mult(const elem &f) const
-// return f*this.  return NULL of sizes or types do not match.
-{
-#ifdef DEVELOPMENT
-#warning "to be written"
-#endif
-  return 0;
-}
-
-template <typename CoeffRing>
-M2_arrayint columnEchelonForm(SMat<CoeffRing> *A)
-{
-#ifdef DEVELOPMENT
-#warning "to be written"
-#endif
-  return 0;
-}
-
-
-
 ///////////////////////////////////
 /// Fast linear algebra routines //
 ///////////////////////////////////
@@ -1023,7 +1009,20 @@ size_t SMat<CoeffRing>::rank() const
 }
 
 template<typename CoeffRing>
+size_t SMat<CoeffRing>::new_rank() const
+{
+  ERROR("not implemented for this ring yet");
+  return static_cast<size_t>(-1);
+}
+
+template<typename CoeffRing>
 void SMat<CoeffRing>::determinant(elem &result) const
+{
+  ERROR("not implemented for this ring yet");
+}
+
+template<typename CoeffRing>
+void SMat<CoeffRing>::new_determinant(elem &result) const
 {
   ERROR("not implemented for this ring yet");
 }
@@ -1066,10 +1065,24 @@ void SMat<CoeffRing>::addMultipleTo(const SMat<CoeffRing> &A,
   ERROR("not implemented for this ring yet");
 }
 
+template<typename CoeffRing>
+void SMat<CoeffRing>::mult(const SMat<CoeffRing>& B,
+                           SMat<CoeffRing>& result) const
+{
+  ERROR("not implemented for this ring yet");
+}
 
 #include "aring-ffpack.hpp"
+#include "aring-zz-flint.hpp"
+#include "aring-zzp-flint.hpp"
 template class SMat<CoefficientRingZZ_NTL>;
 template class SMat<M2::ARingZZp>;
+
+#ifdef HAVE_FLINT
+template class SMat<M2::ARingZZpFlint>;
+template class SMat<M2::ARingZZ>;
+#endif // HAVE_FLINT
+
 template class SMat<M2::ARingTower>;
 template class SMat<M2::ARingZZpFFPACK>;
 template class SMat<M2::ARingGF>;
@@ -1079,6 +1092,7 @@ template class SMat<CoefficientRingRRR>;
 template class SMat<CoefficientRingCCC>;
 template class SMat<CoefficientRingR>;
 template class SMat<M2::ARingRRR>;
+
 
 // Local Variables:
 // compile-command: "make -C $M2BUILDDIR/Macaulay2/e "

@@ -19,9 +19,12 @@
 #include "aring-RRR.hpp"
 #include "aring-glue.hpp"
 #include "aring-tower.hpp"
+#include "aring-zz-flint.hpp"
+#include "aring-zzp-flint.hpp"
 
 #include "lapack.hpp"
 #include "dmat-LU.hpp"
+//#include "dmat-zzp-flint.hpp"
 
 #if 0
 // Considering this kind of code
@@ -221,19 +224,23 @@ MutableMatrix *MutableMatrix::from_matrix(const Matrix *m, bool prefer_dense)
 
 Matrix *MutableMatrix::to_matrix() const
 {
-  size_t nrows = n_rows();
-  size_t ncols = n_cols();
+#warning "FreeModule has limit size of int, not size_t"
+  int nrows = static_cast<int>(n_rows());
+  int ncols = static_cast<int>(n_cols());
   FreeModule *F = get_ring()->make_FreeModule(nrows);
   MatrixConstructor result(F,ncols);
+  if (nrows == 0 || ncols == 0)
+    return result.to_matrix();
   ring_elem f;
   iterator *i = begin();
-  for (size_t c=0; c<ncols; c++)
+  for (int c=0; c<ncols; c++)
     {
       ring_elem a;
       for (i->set(c); i->valid(); i->next())
         {
           i->copy_ring_elem(a);
-          result.set_entry(i->row(), c, a);
+          int r = static_cast<int>(i->row());
+          result.set_entry(r, c, a);
         }
     }
   delete i;
@@ -288,16 +295,6 @@ bool MutableMatrix::set_values(M2_arrayint rows,
     }
   return true;
 }
-
-#if 0
-template<typename Mat>
-MutableMat<Mat> *MutableMat<Mat>::grab_Mat(const Mat *m) {
-    MutableMat *result = new MutableMat;
-    Mat *copy_m = m->copy();
-    result->mat.grab(copy_m);
-    return result;
-  }
-#endif
 
 ///////////////////////////////////
 //// Linear algebra routines //////
@@ -809,6 +806,20 @@ template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZp>(const Ring* Rgen
                                                  size_t nrows,
                                                  size_t ncols,
                                                  bool dense);
+
+#ifdef HAVE_FLINT
+template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZ>(const Ring* Rgeneral,
+                                                 const M2::ARingZZ* R,
+                                                 size_t nrows,
+                                                 size_t ncols,
+                                                 bool dense);
+template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZpFlint>(const Ring* Rgeneral,
+                                                 const M2::ARingZZpFlint* R,
+                                                 size_t nrows,
+                                                 size_t ncols,
+                                                 bool dense);
+#endif
+
 template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingTower>(const Ring* Rgeneral,
                                                  const M2::ARingTower* R,
                                                  size_t nrows,

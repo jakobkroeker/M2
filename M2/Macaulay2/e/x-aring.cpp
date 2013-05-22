@@ -4,6 +4,8 @@
 #include "relem.hpp"
 #include "aring-glue.hpp"
 #include "aring-zzp.hpp"
+#include "aring-zz-flint.hpp"
+#include "aring-zzp-flint.hpp"
 #include "aring-gf.hpp"
 #include "aring-m2-gf.hpp"
 #include "aring-ffpack.hpp"
@@ -17,9 +19,20 @@
 memt::BufferPool testBuffer(16);
 #endif
 
-const Ring /* or null */ *rawARingZZp(int p)
-  /* p must be a prime number <= 32767 */
+const Ring* /* or null */ rawARingZZFlint()
 {
+#if HAVE_FLINT
+  M2::ARingZZ *A = new M2::ARingZZ();
+  return M2::ConcreteRing<M2::ARingZZ>::create(A);
+#else
+  ERROR("M2 not configured with --enable-flint");
+  return 0;
+#endif
+}
+
+const Ring /* or null */ *rawARingZZp(unsigned long p)
+{
+  std::cout << "Prime is " << p;
   if (p <= 1 || p >= 32750)
     {
       ERROR("ZZP: expected a prime number p in range 2 <= p <= 32749");
@@ -27,6 +40,17 @@ const Ring /* or null */ *rawARingZZp(int p)
     }
   M2::ARingZZp *A = new M2::ARingZZp(p);
   return M2::ConcreteRing<M2::ARingZZp>::create(A);
+}
+const Ring /* or null */ *rawARingZZpFlint(unsigned long p)
+{
+#ifdef HAVE_FLINT
+  std::cout << "Prime is " << p;
+  M2::ARingZZpFlint *A = new M2::ARingZZpFlint(p);
+  return M2::ConcreteRing<M2::ARingZZpFlint>::create(A);
+#else
+  ERROR("M2 not configured with --enable-flint");
+  return 0;
+#endif
 }
 
 const Ring /* or null */ *rawARingGaloisField1(const RingElement *f)
@@ -291,11 +315,11 @@ const Ring /* or null */ *rawARingTower1(const Ring *K, M2_ArrayString names)
 const Ring /* or null */ *rawARingTower2(const Ring *R1, M2_ArrayString new_names)
 {
   try {
-    const M2::ConcreteRing<M2::ARingTower> *K = dynamic_cast<const M2::ConcreteRing<M2::ARingTower> *>(K);
+    const M2::ConcreteRing<M2::ARingTower> *K = dynamic_cast<const M2::ConcreteRing<M2::ARingTower> *>(R1);
     if (K == 0)
       {
-	ERROR("expected a tower ring");
-	return NULL;
+        ERROR("expected a tower ring");
+        return NULL;
       }
     const M2::ARingTower &A = K->ring();
     
@@ -313,14 +337,14 @@ const Ring /* or null */ *rawARingTower2(const Ring *R1, M2_ArrayString new_name
 const Ring /* or null */ *rawARingTower3(const Ring *R1, engine_RawRingElementArray eqns)
 {
   try {
-    const M2::ConcreteRing<M2::ARingTower> *K = dynamic_cast<const M2::ConcreteRing<M2::ARingTower> *>(K);
+    const M2::ConcreteRing<M2::ARingTower> *K = dynamic_cast<const M2::ConcreteRing<M2::ARingTower> *>(R1);
     if (K == 0)
       {
-	ERROR("expected a tower ring");
-	return NULL;
+        ERROR("expected a tower ring");
+        return NULL;
       }
     const M2::ARingTower &A = K->ring();
-
+    
     std::vector<M2::ARingTower::ElementType> extensions;
     
     for (int i=0; i<eqns->len; i++)

@@ -121,12 +121,18 @@ namespace M2 {
   //explicit instantiation
   template class ConcreteRing< ARingZZp >;
   template class ConcreteRing< ARingZZpFFPACK >;
+
+#ifdef HAVE_FLINT
+  template class ConcreteRing<ARingZZ>;
+  template class ConcreteRing< ARingZZpFlint >;
+#endif
   
   template class ConcreteRing< ARingGFM2 >;
   template class ConcreteRing< ARingGF >;
 
   template class ConcreteRing<ARingRRR>;
   template class ConcreteRing<ARingTower>;
+
 
   ///////////////////////////
   // Matrix creation ////////

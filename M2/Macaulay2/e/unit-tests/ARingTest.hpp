@@ -106,7 +106,7 @@ void testCoercions(const T& R)
       R.set_from_mpz(a,m); // a = (base + i) mod charac
       R.set_from_int(b,i);
       R.add(b,c,b); // b = (base mod charac) + (i mod charac)
-      EXPECT_EQ(a,b); // a, b should be equal
+      EXPECT_TRUE(R.is_equal(a,b)); // a, b should be equal
     }
 
   // set_from_mpq
@@ -117,14 +117,14 @@ void testCoercions(const T& R)
 
       // check that (43999 mod charac)/(i mod charac) == n1 mod charac
       // if (i mod charac) is not zero.
-      if (i % (R.characteristic()) == 0) continue;
+      if (R.characteristic() == 0 or (i % R.characteristic()) == 0) continue;
       R.set_from_mpq(a, n1);
       R.set_from_int(b, 43999);
       R.set_from_int(c, i);
       if (!R.is_zero(c))
         {
           R.divide(c,b,c);
-          EXPECT_EQ(a, c);
+          EXPECT_TRUE(R.is_equal(a,c));
         }
     }
 
@@ -417,6 +417,17 @@ void testFiniteField(const T& R, int ntrials)
   // get generator
 }
 
+template <typename T>
+void testARingInterface(const T& R)
+{
+  // this test makes sure that all of the interface functions required 
+  // actually exist.
+
+  const RingID rid = R.ringID;
+  std::cout << "ring ID: " << rid << std::endl;
+  
+  size_t characteristic
+}
 #endif
 
 // Local Variables:

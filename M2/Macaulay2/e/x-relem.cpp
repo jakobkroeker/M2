@@ -403,7 +403,7 @@ const Ring *rawSchurSnRing(const Ring *A, int n)
 
 const Ring /* or null */ *rawTowerRing1(long charac, M2_ArrayString names)
 {
-  return Tower::create(charac, names);
+  return Tower::create(static_cast<int>(charac), names);
 }
 
 const Ring /* or null */ *rawTowerRing2(const Ring *R1, M2_ArrayString new_names)
@@ -504,6 +504,10 @@ const Ring /* or null */ *rawDenominatorRing(const Ring *R)
   return P->getDenominatorRing();
 }
 /*********************************************************************/
+unsigned long IM2_RingElement_hash(const RingElement *a)
+{
+  return a->get_hash_value();
+}
 
 const Ring * IM2_RingElement_ring(const RingElement *a)
 {

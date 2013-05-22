@@ -50,6 +50,8 @@ namespace M2 {
     // Routines to help in switch from coeffrings to aring //
     // these will be renamed or go away (hopefully) /////////
     /////////////////////////////////////////////////////////
+    unsigned long computeHashValue(const elem& a) const { return static_cast<unsigned long>(a); }
+
     void init_set(elem &result, elem a) const { result = a; }
     void set(elem &result, elem a) const { result = a; }
 
@@ -108,8 +110,6 @@ namespace M2 {
     void clear(elem &result) const { /* nothing */ }
 
     void set_zero(elem &result) const { result = 0; }
-
-    void copy(elem &result, elem a) const { result = a; }
 
     void set_from_int(elem &result, int a) const {
       a = a % p;
@@ -253,6 +253,7 @@ namespace M2 {
     }
 
     void eval(const RingMap *map, const elem f, int first_var, ring_elem &result) const;
+
   private:
     void initialize_tables();
     

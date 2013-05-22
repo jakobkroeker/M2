@@ -87,7 +87,7 @@ public:
     void next() { i.next(); }
     bool valid() { return i.valid(); }
     size_t row() { return i.row(); }
-    elem value() { return i.value(); }
+    const elem& value() { return i.value(); }
     void copy_ring_elem(ring_elem &result) { i.copy_elem(result); }
   };
 #endif
@@ -137,7 +137,9 @@ public:
      returns -1 if the column is 0 */
   {
     elem b;
+    mat.get_CoeffRing()->init(b);
     mat.get_CoeffRing()->set_zero(b);
+
     size_t ret = mat.lead_row(col, b);
     if (ret >= 0)
       mat.get_CoeffRing()->to_ring_elem(result, b);
@@ -151,6 +153,8 @@ public:
     if (r >= 0 && r < n_rows() && c >= 0 && c < n_cols())
       {
         elem a;
+        
+        mat.get_CoeffRing()->init(a);
         mat.get_CoeffRing()->set_zero(a);
         if (mat.get_entry(r,c,a))
           {
@@ -419,14 +423,6 @@ public:
     return result;
   }
 
-  virtual bool set_submatrix(M2_arrayint rows,
-                             M2_arrayint cols,
-                             const MutableMatrix *N)
-  // returns false iff there is an error
-  {
-    return mat.set_submatrix(rows,cols,N);
-  }
-
   ///////////////////////////////
   // Matrix operations //////////
   ///////////////////////////////
@@ -487,16 +483,6 @@ public:
       }
     MutableMat *result = clone();
     result->getMat().subtractInPlace(B1->getMat());
-    return result;
-  }
-
-  virtual MutableMat * mult(const MutableMatrix *B) const
-  // return this * B.  return NULL of sizes or types do not match.
-  // note: can mult a sparse + dense
-  //       can mult a matrix over RR and one over CC and/or one over ZZ.
-  {
-    MutableMat *result = new MutableMat;
-    result->mat.grab(mat.mult(B));
     return result;
   }
 
@@ -591,6 +577,8 @@ public:
                                              bool transposeB,
                                              const RingElement* a,
                                              const RingElement* b);
+
+  virtual MutableMatrix /* or null */ * mult(const MutableMatrix *B) const;
 };
 
 
@@ -601,7 +589,7 @@ public:
 template <typename T>
 size_t MutableMat<T>::rank() const 
 {
-  return mat.rank();
+  return mat.new_rank();
 }
 
 template <typename T>
@@ -609,8 +597,10 @@ const RingElement* MutableMat<T>::determinant() const
 {
   ring_elem det;
   elem a;
-  mat.determinant(a);
-  mat.get_CoeffRing()->to_ring_elem(det, a);
+  mat.ring().init(a);
+  mat.new_determinant(a);
+  mat.ring().to_ring_elem(det, a);
+  mat.ring().clear(a);
   return RingElement::make_raw(mat.get_ring(), det);
 }
 
@@ -624,6 +614,31 @@ MutableMatrix* MutableMat<T>::invert() const
       delete result;
       return 0;
     }
+  return result;
+}
+
+template <typename T>
+MutableMatrix /* or null */ * MutableMat<T>::mult(const MutableMatrix *B) const
+{
+  // First, make sure B has the same ring/type as 'this'.
+  const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
+  if (B1 == 0)
+    {
+      ERROR("mutable matrix/ring type for (mutable) matrix multiplication required to be the same");
+      return 0;
+    }
+  // Second, make sure the sizes are correct.
+  if (mat.n_cols() != B1->n_rows())
+    {
+      ERROR("matrix sizes do not match in matrix multiplication");
+      return 0;
+    }
+  // create the result matrix
+  MutableMat<T>*  result = makeZeroMatrix(n_rows(), B->n_cols());
+
+  // Call the resulting matrix routine.
+  mat.mult(B1->mat, result->mat);
+
   return result;
 }
 

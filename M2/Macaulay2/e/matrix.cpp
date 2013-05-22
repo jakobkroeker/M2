@@ -1044,11 +1044,11 @@ Matrix /* or null */ *Matrix::koszul(int p) const
         {
           negate = !negate;
           size_t x = C.encodeBoundary(r, a);
-          ring_elem f = elem(0, a[r]);
+          ring_elem f = elem(0, static_cast<int>(a[r]));
           if (negate)
             R->negate_to(f);
 
-          mat.set_entry(x,c,f);
+          mat.set_entry(static_cast<int>(x),c,f);
         }
     }
   return mat.to_matrix();
@@ -1244,7 +1244,7 @@ Matrix *Matrix::wedge_product(int p, int q, const FreeModule *F)
               continue;
             }
           ring_elem r = F->get_ring()->from_int(sgn);
-          size_t row = C.encode(c);
+          int row = static_cast<int>(C.encode(c));
           mat.set_entry(row,col++,r);
         }
     }
@@ -1639,7 +1639,7 @@ static vec coeffs_of_vec(exponent_table *E, M2_arrayint vars,
         {
           M->to_expvector(h->monom, exp);
           get_part_of_expvector(vars, exp, g->comp, scratch_exp);
-          int val = exponent_table_get(E, scratch_exp);
+          int val = static_cast<int>(exponent_table_get(E, scratch_exp));
           if (val > 0)
             {
               M->from_expvector(exp, mon);

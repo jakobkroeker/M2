@@ -15,10 +15,15 @@
 // #define MPZ_RINGELEM(a) ((ring_elem) ((Nterm *) (a)))
 #endif
 
+unsigned long compute_hash_value_mpz(mpz_ptr a)
+{
+  return static_cast<unsigned long>(mpz_get_si(a));
+}
+
 bool RingZZ::initialize_ZZ(const PolynomialRing *deg_ring)
 {
   initialize_ring(0);
-  _elem_size = sizeof(mpz_t);
+  _elem_size = static_cast<int>(sizeof(mpz_t));
   _zero_elem = new_elem();
   mpz_init_set_si(_zero_elem, 0);
 
@@ -44,6 +49,11 @@ mpz_ptr RingZZ::new_elem() const
 }
 void RingZZ::remove_elem(mpz_ptr f) const
 {
+}
+
+unsigned long RingZZ::compute_hash_value(const ring_elem a) const
+{
+  return compute_hash_value_mpz(a.get_mpz());
 }
 
 bool RingZZ::get_ui(unsigned int &result, mpz_t n)

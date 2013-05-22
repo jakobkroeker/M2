@@ -9,8 +9,11 @@ INTERFACE2 = \
 	newdelete \
 
 INTERFACE = \
+	reader \
 	matrix-stream \
 	cra \
+	DenseMatrixDef \
+	aring-zzp-flint \
 	aring-zz-flint \
 	aring-RRR \
 	aring-tower \

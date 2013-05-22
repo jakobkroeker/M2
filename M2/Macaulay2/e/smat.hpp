@@ -5,31 +5,29 @@
 
 union ring_elem;
 #include "ZZp.hpp"
-// This is the low level dense matrix class.
-// The only reason "RingType" is present is to more easily
-//   communicate with the rest of Macaulay2
-
 
 class MutableMatrix;
 
 template<typename ACoeffRing>
 class SMat : public our_new_delete
 {
+
+  //  typedef typename EigenvalueType<ACoeffRing>::Ring EigenvalueRing;
+  //  typedef SparseMatrixLinAlg<ACoeffRing> LinAlg;
+  //  typedef SparseMatrixArithmetic<CoeffRing> Arithmetic;
 public:
   typedef ACoeffRing CoeffRing;
-  typedef typename CoeffRing::elem elem;
-  typedef elem ElementType; // same as elem.  Will possibly remove 'elem' later.
+  typedef typename CoeffRing::elem ElementType;
+  typedef ElementType elem; // same as ElementType.  Will possibly remove 'elem' later.
 
-  typedef SMat<ACoeffRing> EigenvalueMatrixType;
-
-  //typedef typename CoeffRing::ring_type RingType;
+  //  typedef SMat<EigenvalueRing> EigenvalueMatrixType;
 
 private:
   struct sparsevec : public our_new_delete
   {
     sparsevec *next;
     size_t row;
-    elem coeff;
+    ElementType coeff;
   };
 
 public:
@@ -169,21 +167,17 @@ public:
 
   bool is_equal(const SMat& B) const;
 
-  SMat * mult(const MutableMatrix *B) const;
-  // return this * B.  return NULL of sizes or types do not match.
-  // note: can mult a sparse + dense
-  //       can mult a matrix over RR and one over CC and/or one over ZZ.
-
-  SMat * mult(const elem &f) const;
-  // return f*this.  return NULL of sizes or types do not match.
-
   ///////////////////////////////////
   /// Fast linear algebra routines //
   ///////////////////////////////////
 
   size_t rank() const;
 
+  size_t new_rank() const;
+
   void determinant(elem &result) const;
+
+  void new_determinant(elem &result) const;
 
   // Set 'inverse' with the inverse of 'this'.  If the matrix is not square, or 
   // the matrix is not invertible, or
@@ -220,6 +214,8 @@ public:
                      ElementType& a,
                      ElementType& b);
 
+  void mult(const SMat<ACoeffRing>& B,
+            SMat<ACoeffRing>& result) const;
 
   // this += B, assertion failure on bad ring or bad sizes
   void addInPlace(const SMat& B);

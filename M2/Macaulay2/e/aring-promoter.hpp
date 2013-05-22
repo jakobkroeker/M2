@@ -10,6 +10,8 @@
 #include "aring-ffpack.hpp"
 #include "aring-m2-gf.hpp"
 #include "aring-tower.hpp"
+#include "aring-zz-flint.hpp"
+#include "aring-zzp-flint.hpp"
 
 namespace M2 {
   class RingPromoter

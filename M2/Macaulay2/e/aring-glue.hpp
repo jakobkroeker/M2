@@ -45,6 +45,16 @@ namespace M2 {
     ////////////////////////////
     // Functions on elements ///
     ////////////////////////////
+    virtual unsigned long compute_hash_value(ring_elem a) const
+    {
+      ElementType b;
+      ring().init(b);
+      ring().from_ring_elem(b, a);
+      unsigned long result = ring().computeHashValue(b);
+      ring().clear(b);
+      return result;
+    }
+
     virtual int coerce_to_int(ring_elem a) const
     {
       //TODO: implement or remove
@@ -202,7 +212,7 @@ namespace M2 {
       R->init(a);
       R->init(b);
       R->from_ring_elem(a, f);
-      R->copy(b,a);
+      R->set(b,a);
       R->to_ring_elem(result,b);
       R->clear(a);
       R->clear(b);

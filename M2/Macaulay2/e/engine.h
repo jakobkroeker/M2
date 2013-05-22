@@ -154,7 +154,7 @@ extern "C" {
   /**** ARing routines ******************************/
   /**************************************************/
 
-  const Ring /* or null */ *rawARingZZp(int p); /* connected */
+  const Ring /* or null */ *rawARingZZp(unsigned long p); /* connected */
     /* Expects a prime number p in range 2 <= p <= 32749 */
 
   const Ring /* or null */ *rawARingGaloisField1(const RingElement *prim); /* connected */
@@ -183,6 +183,14 @@ extern "C" {
   const RingElement*  rawARingGFGenerator(const Ring *R);
   /* given an ARingGF, return the  the generator of the multiplicative group.
     */
+
+  /**************************************************/
+  /**** ARing flint routines ************************/
+  /**************************************************/
+  const Ring* /* or null */ rawARingZZFlint(); /* connected */
+
+  const Ring /* or null */ *rawARingZZpFlint(unsigned long p); /* connected */
+    /* Expects a prime number p in range 2 <= p <= 2^64-1 */
 
   /**************************************************/
   /**** Ring routines *******************************/
@@ -1291,6 +1299,12 @@ extern "C" {
                                                       M2_bool transposeB,
                                                       const RingElement* a,
                                                       const RingElement* b);
+
+  /* return A*B, where A,B are mutable matrices, over same ring, same density type.
+   */
+  MutableMatrix* /* or null */ rawLinAlgMult(const MutableMatrix* A,
+                                             const MutableMatrix* B);
+
 
   engine_RawRingElementArrayOrNull rawLinAlgCharPoly(MutableMatrix* A);
   // returns an array whose coefficients give the characteristic polynomial of the square matrix A
