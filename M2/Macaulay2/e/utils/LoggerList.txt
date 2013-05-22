@@ -1,0 +1,6 @@
+Logger list
+
+http://log4cpp.sourceforge.net/
+http://log4cplus.sourceforge.net/
+http://boost-log.sourceforge.net/libs/log/doc/html/index.html
+http://logging.apache.org/log4cxx/
