@@ -83,7 +83,7 @@ class M2LoggerT
 
  
     
-     M2LoggerT() : M2LoggerT("M2LoggerT")    { }; 
+        M2LoggerT() : M2LoggerT("M2LoggerT")    { }; 
         
   
     private:
@@ -111,14 +111,14 @@ class M2Logger : public M2LoggerT<M2Logger>
 {  
     
 protected:
-      // const std::string name_m;
-      //    M2Logger() : name_m("M2Logger") {}
-     
-      // M2Logger() : M2LoggerT("M2Logger") {}
-       M2Logger() : M2LoggerT() {}
+    // const std::string name_m;
+    //    M2Logger() : name_m("M2Logger") {}
+    
+    // M2Logger() : M2LoggerT("M2Logger") {}
+    M2Logger() : M2LoggerT() {}
      
        
-     friend class M2LoggerT;
+    friend class M2LoggerT;
 };
 
 
@@ -128,10 +128,10 @@ protected:
        // const std::string name_m;
        // CallLogger() : name_m("CallLogger") {}
      
-       CallLogger() : M2LoggerT("CallLogger") {}
+    CallLogger() : M2LoggerT("CallLogger") {}
        
    
 
-     friend class M2LoggerT;    
+    friend class M2LoggerT;    
 };
 

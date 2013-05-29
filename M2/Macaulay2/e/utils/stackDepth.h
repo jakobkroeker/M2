@@ -89,7 +89,7 @@ int get_stack_depth(void)
 
 #ifdef __GNUC__
 #include <execinfo.h>
- #define BACKTRACE_BUFFER_SIZE 10000
+#define BACKTRACE_BUFFER_SIZE 10000
  
  
 static int ref_stack_depth=0;
@@ -97,11 +97,11 @@ static int ref_stack_depth=0;
 // #hack
 inline int adjust_ref_stack_depth(void)
 {
-     void *buffer[BACKTRACE_BUFFER_SIZE];
-    
-   size_t depth;
+    void *buffer[BACKTRACE_BUFFER_SIZE];
 
-   ref_stack_depth = backtrace(buffer, BACKTRACE_BUFFER_SIZE);
+    size_t depth;
+
+    ref_stack_depth = backtrace(buffer, BACKTRACE_BUFFER_SIZE);
    
 }
 
@@ -109,12 +109,12 @@ int get_stack_depth(void)
 {
   
     void *buffer[BACKTRACE_BUFFER_SIZE];
-    
-   size_t depth;
 
-   depth = backtrace(buffer, BACKTRACE_BUFFER_SIZE);
-   
-   if (ref_stack_depth > depth )
+    size_t depth;
+
+    depth = backtrace(buffer, BACKTRACE_BUFFER_SIZE);
+
+    if (ref_stack_depth > depth )
        return 0;
    
    return depth-ref_stack_depth;
@@ -123,7 +123,7 @@ int get_stack_depth(void)
 #else
 int get_stack_depth(void)
 {
-   std::cerr << "get_stack_depth only implemented for linux" << std::endl;
-   return 0;
+    std::cerr << "get_stack_depth only implemented for linux" << std::endl;
+    return 0;
 }
 #endif

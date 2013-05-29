@@ -14,7 +14,7 @@ template <class DerivedLogger>
 int     M2LoggerT<DerivedLogger>::priority( )
 {
     DerivedLogger& logger= DerivedLogger::get();
-    
+
     return logger.priority_m ;
 }
 
@@ -28,7 +28,7 @@ void     M2LoggerT<DerivedLogger>::log(int priority, const std::string& message)
 template <class DerivedLogger> 
 void     M2LoggerT<DerivedLogger>::info(  const std::string& message)
 {
-   M2LoggerT<DerivedLogger>::log(0,  message);
+        M2LoggerT<DerivedLogger>::log(0,  message);
 }
 template <class DerivedLogger> 
 void     M2LoggerT<DerivedLogger>::warn(  const std::string& message)
@@ -38,13 +38,13 @@ void     M2LoggerT<DerivedLogger>::warn(  const std::string& message)
 template <class DerivedLogger> 
 void     M2LoggerT<DerivedLogger>::error(  const std::string& message)
 {
-   M2LoggerT<DerivedLogger>::log(2,  message);
+    M2LoggerT<DerivedLogger>::log(2,  message);
 }
 
 template <class DerivedLogger> 
 void     M2LoggerT<DerivedLogger>::debug(  const std::string& message)
 {
-   M2LoggerT<DerivedLogger>::log(3,  message);
+    M2LoggerT<DerivedLogger>::log(3,  message);
 }
 
 template <class DerivedLogger> 
@@ -102,25 +102,25 @@ void M2LoggerT<DerivedLogger>:: iPrint( )
 {
     
     std::ostream& os = *(  osp_m);
-       os <<   std::endl;
-     os << "#################"   << "# Logs of " <<  name() << std::endl;
-        
-        std::ostream_iterator<std::string> outIter( os, "\n" );
-        copy(  logs_m.begin(),  logs_m.end(), outIter );
-        os <<   std::endl;
+    os <<   std::endl;
+    os << "#################"   << "# Logs of " <<  name() << std::endl;
+
+    std::ostream_iterator<std::string> outIter( os, "\n" );
+    copy(  logs_m.begin(),  logs_m.end(), outIter );
+    os <<   std::endl;
         
 }
         
 template <class DerivedLogger> 
 void M2LoggerT<DerivedLogger>::iLog( int priority, const std::string& message)
 {
-            //assert (priority>=minPriority&& priority<=maxPriority); 
-        if (priority_m>=priority and priority>=minPriority)
+    //assert (priority>=minPriority&& priority<=maxPriority); 
+    if (priority_m>=priority and priority>=minPriority)
     {
         //std::cerr << "priority mathced"<< std::endl;
         std::string  local_message(message);
         
-            // std::cerr << "message" << message << std::endl;
+        // std::cerr << "message" << message << std::endl;
         
         if ( useStackDepth() )
         { 
@@ -140,18 +140,18 @@ void M2LoggerT<DerivedLogger>::iLog( int priority, const std::string& message)
 template <class DerivedLogger> 
 void M2LoggerT<DerivedLogger>::iSave(std::string filename)
 {
-   std::ofstream logfile;
-  logfile.open (filename);
-  if (not logfile.good()) 
-  {
-      throw std::runtime_error("open file '"+std::string(filename)+"' failed");
-  }
-   std::ostream_iterator<std::string> outIter( logfile, "\n" );
-        copy(  logs_m.begin(),  logs_m.end(), outIter );
-        
-         if (not logfile.good()) 
-  {
-      throw std::runtime_error("writing to file '"+std::string(filename)+"' failed");
-  }
-  logfile.close();
+    std::ofstream logfile;
+    logfile.open (filename);
+    if (not logfile.good()) 
+    {
+        throw std::runtime_error("open file '"+std::string(filename)+"' failed");
+    }
+    std::ostream_iterator<std::string> outIter( logfile, "\n" );
+    copy(  logs_m.begin(),  logs_m.end(), outIter );
+
+    if (not logfile.good()) 
+    {
+        throw std::runtime_error("writing to file '"+std::string(filename)+"' failed");
+    }
+    logfile.close();
 }

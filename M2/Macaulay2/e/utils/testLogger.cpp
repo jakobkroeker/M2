@@ -16,35 +16,35 @@ void foo()
 {
     M2Logger::log(1, "test sdf");
     bar(5);
-    
-     M2Logger::warn( "leave " + std::string(__FUNCTION__) );
-     M2log (3, "foobar") ;
-     CallLogger::error( "foobar" );
+
+    M2Logger::warn( "leave " + std::string(__FUNCTION__) );
+    M2log (3, "foobar") ;
+    CallLogger::error( "foobar" );
 }
 
 
 int main()
 {
     adjust_ref_stack_depth(); // optional
-    
-      std::cout <<  std::endl;
-     M2Logger::setPriority(2);
+
+    std::cout <<  std::endl;
+    M2Logger::setPriority(2);
     M2Logger::useStackDepth(true);
-      M2Logger::log(1, "main");
-    
-      foo();
-    
+    M2Logger::log(1, "main");
+
+    foo();
+
     std::cout << "M2Logger logged foobar: " << (M2Logger::hasMessage("foobar") ? "true"  :"false") << std::endl;
     std::cout << "M2Logger logged test: " << ( M2Logger::hasMessage("test")  ? "true"  :"false") << std::endl;
-    
+
     M2Logger::print();
     CallLogger::print();
-       std::cout <<  std::endl;
-       
-      std::cout <<    get_stack_depth() << std::endl;
+    std::cout <<  std::endl;
 
-    
-      M2Logger::save("M2log.log");
-      
-        M2Logger::save("M2log.#,%$log/");
+    std::cout <<    get_stack_depth() << std::endl;
+
+
+    M2Logger::save("M2log.log");
+
+    M2Logger::save("M2log.#,%$log/");
 }
