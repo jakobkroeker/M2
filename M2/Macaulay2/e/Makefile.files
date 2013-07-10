@@ -13,6 +13,8 @@ INTERFACE = \
 	matrix-stream \
 	cra \
 	DenseMatrixDef \
+	aring-qq-flint \
+	aring-zz-gmp \
 	aring-zzp-flint \
 	aring-zz-flint \
 	aring-RRR \
@@ -21,8 +23,8 @@ INTERFACE = \
 	aring-promoter \
 	aring-glue \
 	aring-zzp \
-	aring-gf \
-	aring-ffpack \
+	aring-gf-givaro \
+	aring-zzp-ffpack \
 	aring \
 	schurSn \
 	schur2 \

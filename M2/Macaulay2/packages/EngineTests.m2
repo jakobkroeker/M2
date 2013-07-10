@@ -12,7 +12,8 @@ newPackage(
 
 export { ringOps, 
      testMutableMatrices,
-     testFrac
+     testFrac,
+     testGF
      }
 
 --load (EngineTests#"source directory"|"EngineTests/test-gbZZ.m2")
@@ -86,7 +87,7 @@ testops = (R) -> (
   -- rowSwap, columnSwap, 
   -- rowAdd, columnAdd
   -- rowMult, columnMult
-  -- NOT YET: rowPermute,columnPermute
+  -- rowPermute,columnPermute (TODO: make sure these are correct, not just the same for dense and sparse)
   m := mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>false);
   assert(numRows m == 5);
   assert(numColumns m == 6);
@@ -126,7 +127,6 @@ testops = (R) -> (
   m2 = matrix columnMult(m, 1, 14);
   assert(m1 == m2);
   --
-  {*
   m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>false);
   m1 = matrix columnPermute(m,1,{2,0,1});
   m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>true);
@@ -138,11 +138,11 @@ testops = (R) -> (
   m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>true);
   m2 = matrix rowPermute(m,1,{2,0,1});  
   assert(m1 == m2);
-    *}
   )
 
 debug Core
 testops0 = (R) -> (
+    << "testops0..." << endl;
     -- test whether operations work on matrices with 0x0 matrix
     -- also rx0 and 0xr
     m1 := mutableMatrix(R, 0, 0);
@@ -297,33 +297,121 @@ testops5 = (R) -> (
      assert(submatrix(m, {1,2,4,3}, {3,2,1}) == mutableMatrix submatrix(matrix m, {1,2,4,3}, {3,2,1}));
      assert(submatrix(m, {3,2,1}) == mutableMatrix submatrix(matrix m, {3,2,1}));
      -- submatrices for sparse matrix types:
-     --m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>false);
-     --submatrix(m, {1,2,4,2}, {3,2,1});
-     --submatrix(matrix m, {1,2,4,3}, {3,2,1})
-     --assert(submatrix(m, {1,2,4,3}, {3,2,1}) == mutableMatrix submatrix(matrix m, {1,2,4,3}, {3,2,1}));
-     --assert(submatrix(m, {3,2,1}) == mutableMatrix submatrix(matrix m, {3,2,1}));
-     )
-{*
-testops5 = (R) -> (
-     -- still being constructed
-     m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>true);
-     assert(2*m == m+m);
-     assert(3*m == m+m+m);
      m = mutableMatrix(map(R^5,R^6, (i,j) -> 100*i+j), Dense=>false);
-     assert(2*m == m+m);
-     assert(3*m == m+m+m);
+     submatrix(m, {1,2,4,3}, {3,2,1});
+     submatrix(matrix m, {1,2,4,3}, {3,2,1});
+     assert(submatrix(m, {1,2,4,3}, {3,2,1}) == mutableMatrix(submatrix(matrix m, {1,2,4,3}, {3,2,1}), Dense=>false));
+     assert(submatrix(m, {3,2,1}) == mutableMatrix(submatrix(matrix m, {3,2,1}), Dense=>false));
      )
-*}
 
 debug FastLinearAlgebra
 
-testrank = (R) -> (
-     << "testrank..." << endl;
+testRank = (R) -> (
+     << "testrank (TODO:finish it)..." << endl;
      m1 := random(R^5, R^11);
      m2 := random(R^11, R^6);
      m := mutableMatrix(m1 * m2);
      assert(5 == rank m); -- this can fail every now and then.
+     N := 300;
+     M := 200;
+     m3 := mutableMatrix(ZZ, N, M);
+     m4 := mutableMatrix(ZZ, M, N);
+     fillMatrix m3;
+     fillMatrix m4;
+     m3 = time mutableMatrix sub(matrix m3, QQ);
+     m4 = time mutableMatrix sub(matrix m4, QQ);
+     time (m3*m4); -- MUCH faster than next line!
+     time m5 := mutableMatrix((matrix m3) * (matrix m4));
+     assert(m3*m4 == m5);
+     debug Core;
+     time rawLinAlgDeterminant raw m5;
+     time det m5; -- doesn't work yet
+     time rank m5; -- crashes: duplicate large block deallocation
+     -- test of inverse:
+     m1 = mutableMatrix(QQ, 4, 4);
+     fillMatrix m1 ;
+     inverse m1; -- doesn't work yet
+     m2 = map(QQ, rawLinAlgInvert raw m1);
+     m1*m2 == mutableIdentity(QQ, 4);
      )
+
+testRankFailing = () -> (
+     debug Core;
+     R := ZZFlint;
+     (N,M) := (100,70);
+     m3 := mutableMatrix(R, N, M);
+     m4 := mutableMatrix(R, M, N);
+     fillMatrix m3;
+     fillMatrix m4;
+     m5 := m3*m4;
+     assert(0 == det m5);
+     rank m5;  -- crash for R==ZZFlint
+     m6 := m4*m3;
+     rank m3;
+     rank m4;
+     rank m6 ;-- crash for R==ZZFlint
+     rawLinAlgDeterminant raw m5;
+     rawLinAlgRank raw m5; -- 
+     )
+     
+-- linalg part1: mult, det, rank, inverse, 
+
+<< "warning: not testing transpose of sparse mutable matrices yet" << endl;
+testTranspose = (R) -> (
+    --M := mutableMatrix(R, 3, 5);
+    M := mutableMatrix(R, 3, 5, Dense=>true);
+    fillMatrix M;
+    N := transpose M;
+    N2 := transpose N;
+    N3 := transpose N2;
+    assert(M == N2);
+    assert(N == N3);
+    assert(numRows M == numColumns N);
+    assert(numRows N == numColumns M);
+    for r from 0 to numRows M - 1 do for c from 0 to numColumns M - 1 do (
+        assert(M_(r,c) == N_(c,r));
+        );
+    -- Now test trivial cases
+    M0 := mutableMatrix(R, 0, 0);
+    M1 := transpose M0;
+    assert(M0 == M1);
+    M0 = mutableMatrix(R, 0, 4);
+    M1 = transpose M0;
+    assert(numColumns M1 == 0);
+    assert(numRows M1 == 4);
+    )
+
+testDeterminant = (R) -> (
+    M := mutableMatrix(R, 2, 2);
+    fillMatrix M;
+    assert(determinant M == M_(0,0) * M_(1,1) - M_(0,1) * M_(1,0));
+    )
+
+testMult = (R) -> (
+    E := {{1_R, 2_R, 3_R}, {7_R, 0_R, 0_R}};
+    m1 := mutableMatrix E;
+    m2 := mutableMatrix transpose E;
+    assert(matrix(m1*m2) == (matrix m1) * (matrix m2));
+    assert(matrix(m2*m1) == (matrix m2) * (matrix m1));
+    )
+
+testSolve = (R) -> (
+    E := map(R^2, R^2, {{1, 4}, {2, 3}});
+    B := map(R^2, R^1, {{3}, {7}});
+    M := mutableMatrix E;
+    B = mutableMatrix B;
+    rawLinAlgSolve(raw M,raw B, true) -- doesn't seem to be implemented yet.
+    )
+
+testNullspace = (R) -> (
+    debug Core;
+    --R := ZZp(32003, "Choose"=>"FFPACK");
+    E := map(R^2, R^3, {{1, 4, 5}, {2, 3, 6}});
+    M := mutableMatrix E;
+    X := map(R, rawLinAlgNullSpace(raw M, true));
+    assert((matrix M) * (matrix X) == 0);
+    M * X  -- crash!!
+    )
 
 testMutableMatrices = (R) -> (
      << "testing " << describe R << endl;
@@ -332,9 +420,10 @@ testMutableMatrices = (R) -> (
      testops2 R; 
      testops3 R; 
      testops4 R;
-     --testops5 R; -- Not working on 1.6 for R=ZZ
-     --testrank R;
-     << "tests passed for " << describe R << endl;
+     testops5 R; -- Not working on 1.6 for R=ZZ
+     testTranspose R;
+     --testRank R;
+     << "tests passed for " << raw R << endl;
      )
 
 TEST ///
@@ -345,8 +434,47 @@ TEST ///
   testMutableMatrices(ZZ/101)
 ///
 
+testGF = (strategy) -> (
+    R := null;
+    assert(strategy===null or strategy==="New" or strategy==="Givaro" or strategy==="CompleteGivaro");
+    low := 1;
+    hi := i -> 20;
+    -- This upper bound for CompleteGivaro is made to match the default SizeLimit of 10000.
+    if strategy === "CompleteGivaro" then (
+        low = 2; -- this is an ERROR: it should be able to handle low==1. 
+        hi = p -> if p == 2 then 13 
+        else if p == 3 then 10 
+        else if p == 5 then 5 
+        else if p == 7 then 4
+        else if p < 23 then 3
+        else if p < 100 then 2
+        else 1;
+        );
+    for i from low to hi 2 do (
+        << "doing " <<  (2,i) << endl;
+        R = GF(2^i, Strategy=>strategy);
+        testMutableMatrices R;
+        );
+    for i from low to hi 3 do (
+        R = GF(3^i, Strategy=>strategy);
+        testMutableMatrices R;
+        );
+    for i from low to hi 5 do (
+        R = GF(5^i, Strategy=>strategy);
+        testMutableMatrices R;
+        );
+    for i from low to hi 7 do (
+        R = GF(7,i, Strategy=>strategy);
+        testMutableMatrices R;
+        );
+    )
+
 TEST ///
-  testMutableMatrices(GF 4)
+  testGF null
+  testGF "New"  
+  testGF "Givaro"
+--  testGF "CompleteGivaro" -- this one fails, since it doesn't fall back to a different representation if
+    -- the size is too big
 ///
 
 TEST ///
@@ -362,37 +490,28 @@ TEST ///
 ///
 
 TEST ///
-  testMutableMatrices(RR_53) -- crashes
+  testMutableMatrices(RR_53)
 ///
 
 TEST ///
-  testMutableMatrices(RR_100) -- crashes
+  testMutableMatrices(RR_100)
 ///
 
 TEST ///
-  testMutableMatrices(CC_53) -- crashes
+  testMutableMatrices(CC_53)
 ///
 
 TEST ///
-  testMutableMatrices(CC_100) -- crashes
+  testMutableMatrices(CC_100)
 ///
 
 TEST ///
-  -- FAILS: row-major versus column-major representation
-  debug Core
-  hasFlint := try (rawARingZZpFlint 101; true) else false;
-  if hasFlint then testMutableMatrices(ZZp(101, "Choose"=>"FLINT"))
-///
-
-TEST ///
-  -- FAILS: row-major versus column-major representation
   debug Core
   hasFlint := try (ZZp(101, "Choose"=>"FLINT"); true) else false;
   if hasFlint then testMutableMatrices(ZZp(101, "Choose"=>"FLINT"))
 ///
 
 TEST ///
-  -- passes
   debug Core
   hasFFPACK := try (ZZp(101, "Choose"=>"FFPACK"); true) else false;
   if hasFFPACK then testMutableMatrices(ZZp(101, "Choose"=>"FFPACK"))
@@ -403,6 +522,36 @@ rings = {ZZ, ZZ/101, ZZ/2, GF(4), GF(25), QQ, QQ[x,y], frac(QQ[x,y]), RR_53, RR_
 rings/testMutableMatrices
 ///
 
+TEST ///
+  -- Which rings have linear algebra routines defined?
+  debug Core
+  hasLinAlgRank = (R) -> (
+      M = mutableMatrix(R, 4, 4);
+      fillMatrix M;
+      rawLinAlgRank raw M
+      );
+
+  hasEngineLinearAlgebra(ZZ)
+  hasEngineLinearAlgebra(ZZFlint)
+  hasEngineLinearAlgebra(QQ)
+  assert hasEngineLinearAlgebra(ZZp(101, "Choose"=>"FLINT"))
+  assert hasEngineLinearAlgebra(ZZp(101, "Choose"=>"FFPACK"))
+  hasEngineLinearAlgebra(ZZ/101)
+  hasEngineLinearAlgebra (GF(2^3, Strategy=>null))
+  hasEngineLinearAlgebra (GF(2^3, Strategy=>"Givaro"))
+  hasEngineLinearAlgebra (GF(2^3, Strategy=>"New"))
+
+  hasLinAlgRank ZZ  -- NO
+  hasLinAlgRank QQ  -- NO
+  hasLinAlgRank (ZZp(101, "Choose"=>"FLINT")) -- yes, this one works!
+  hasLinAlgRank (ZZp(101, "Choose"=>"FFPACK")) -- yes, this one works!
+  hasLinAlgRank (ZZp(101, "Choose"=>null))
+
+  debug Core
+  initializeEngineLinearAlgebra QQ
+
+
+///
 TEST ///
 -- of rawDiscreteLog
 debug Core

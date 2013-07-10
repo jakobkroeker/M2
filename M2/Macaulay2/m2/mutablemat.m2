@@ -57,12 +57,16 @@ MutableMatrix + MutableMatrix := (m,n) -> map(ring m, raw m + raw n)
 MutableMatrix - MutableMatrix := (m,n) -> map(ring m, raw m - raw n)
 MutableMatrix * MutableMatrix := (m,n) -> map(ring m, raw m * raw n)
 RingElement * MutableMatrix := (f,n) -> map(ring f, raw f * raw n)
+MutableMatrix * RingElement := (n,f) -> map(ring f, raw n * raw f)
+ZZ * MutableMatrix := (f,n) -> map(ring f, raw (f_(ring n)) * raw n)
+MutableMatrix * ZZ := (n,f) -> map(ring f, raw n * raw (f_(ring n)))
 
 MutableMatrix _ Sequence = (M,ij,val) -> (
      val = promote(val,ring M);
      (raw M)_ij = raw val; 
      val)
 
+transpose MutableMatrix := (f) -> map(ring f, rawDual raw f)
 --------------------------------
 -- submatrices -----------------
 --------------------------------
@@ -232,6 +236,32 @@ SVD Matrix := o -> A -> (
      A = mutableMatrix(A,Dense=>true);
      (Sigma,U,VT) := SVD(A,o);
      (VerticalList flatten entries matrix Sigma,matrix U,matrix VT))
+
+rank MutableMatrix := (M) -> rawLinAlgRank raw M
+
+determinant MutableMatrix := opts -> (M) -> (
+     R := ring M;
+     if hasEngineLinearAlgebra R then 
+       new R from rawLinAlgDeterminant raw M
+     else
+       error "determinant of mutable matrices over this ring is not implemented"
+     )
+
+inverse MutableMatrix := (A) -> (
+     R := ring A;
+     if hasEngineLinearAlgebra R then (
+         if numRows A =!= numColumns A then error "expected square matrix";
+         map(R,rawLinAlgInvert(raw A))
+         )
+     else 
+       error "inverse of mutable matrices over this ring is not implemented"
+     )
+
+nullSpace = method()
+nullSpace(MutableMatrix) := (M) -> (
+     R := ring M;
+     map(R, rawLinAlgNullSpace raw M)
+     )
      
 -- Local Variables:
 -- compile-command: "make -C $M2BUILDDIR/Macaulay2/m2 "

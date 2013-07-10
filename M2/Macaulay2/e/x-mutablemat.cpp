@@ -7,7 +7,7 @@
 #include "GF.hpp"
 
 #include "coeffrings.hpp"
-#include "coeffrings-zz.hpp"
+#include "aring-zz-gmp.hpp"
 #include "mat.hpp"
 #include "fractionfreeLU.hpp"
 #include "LLL.hpp"
@@ -15,7 +15,7 @@
 #include "exceptions.hpp"
 
 #include "matrix.hpp"
-#include "aring-ffpack.hpp"
+#include "aring-zzp-ffpack.hpp"
 #include "mutablemat.hpp"
 
 MutableMatrix * IM2_MutableMatrix_identity(const Ring *R,
@@ -441,6 +441,17 @@ M2_bool IM2_MutableMatrix_is_equal(const MutableMatrix *M,
   return M->is_equal(N);
 }
 
+MutableMatrix /* or null */ * rawMutableMatrixTranspose(MutableMatrix* M)
+{
+     try {
+          return M->transpose();
+     }
+     catch (exc::engine_error e) {
+          ERROR(e.what());
+          return NULL;
+     }
+}
+
 M2_bool rawMutableMatrixIsDense(const MutableMatrix *M)
 {
   return M->is_dense();
@@ -499,6 +510,8 @@ void perform_reduction(MutableMatrix *M,
 
 void reduce_pivots(MutableMatrix *M)
 {
+#warning "reinstate reduce_pivots after iterator is fixed"
+#if 0
   int nr = static_cast<int>(M->n_rows())-1;
   int nc = static_cast<int>(M->n_cols())-1;
   if (nr < 0 || nc < 0) return;
@@ -508,6 +521,8 @@ void reduce_pivots(MutableMatrix *M)
 
   // After using the pivot element, it is moved to [nrows-1,ncols-1]
   // and nrows and ncols are decremented.
+
+
 
   MutableMatrix::iterator *p = M->begin();
   for (int i=0; i<=nc; i++)
@@ -555,6 +570,7 @@ void reduce_pivots(MutableMatrix *M)
           break;
         }
     }
+#endif
 }
 
 ////////////////////////////
@@ -677,6 +693,7 @@ M2_arrayintOrNull IM2_FF_LU(MutableMatrix *M)
 }
 
 #include <fplll-interface.h>
+#include "ntl-interface.hpp"
 
 M2_bool rawLLL(MutableMatrix *M,
                 MutableMatrix /* or null */ *U,
@@ -1080,7 +1097,7 @@ engine_RawRingElementArrayOrNull rawLinAlgCharPoly(MutableMatrix* A)
       ERROR("expected a dense mutable matrix over the ffpack finite field");
       return 0;
     }
-  M2::ARingZZpFFPACK::ElementType* elemsA = B->get_Mat()->get_array();
+  M2::ARingZZpFFPACK::ElementType* elemsA = B->get_Mat()->array();
   std::vector< M2::ARingZZpFFPACK::ElementType > charpoly;
 
   FFPACK::CharPoly(B->get_Mat()->ring().field(), charpoly, A->n_rows(), elemsA, A->n_rows());
@@ -1110,7 +1127,7 @@ engine_RawRingElementArrayOrNull rawLinAlgMinPoly(MutableMatrix* A)
   typedef M2::ARingZZpFFPACK::ElementType Element;
   typedef std::vector<Element> Polynomial;
 
-  Element* elemsA = B->get_Mat()->get_array();
+  Element* elemsA = B->get_Mat()->array();
   size_t n = B->n_rows();
   Polynomial minpoly(n);
 

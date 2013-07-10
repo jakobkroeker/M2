@@ -42,7 +42,7 @@ export {
    RightSide,
    characteristicPolynomial,
    minimalPolynomial,
-   nullSpace,
+--   nullSpace,
    invert,
    rowRankProfile,
    columnRankProfile,
@@ -55,6 +55,8 @@ export {
    }
 
 debug Core
+
+initializeEngineLinearAlgebra QQ
 
 powerMod = method()
 powerMod(ZZ,ZZ,ZZ) := (a,b,c) -> error "ha ha: not done yet!"
@@ -78,10 +80,11 @@ isPrimeField Ring := (R) -> (
      true
      )
 
-transpose MutableMatrix := (M) -> (
-     << "warning: rewrite to be in the engine" << endl;
-     mutableMatrix transpose matrix M
-     )
+-- Now in the engine:
+--transpose MutableMatrix := (M) -> (
+--     << "warning: rewrite to be in the engine" << endl;
+--     mutableMatrix transpose matrix M
+--     )
 
 --MutableMatrix + MutableMatrix := (A,B) -> (
 --     << "warning: rewrite to be in the engine" << endl;
@@ -93,7 +96,8 @@ transpose MutableMatrix := (M) -> (
 --     mutableMatrix(matrix A - matrix B)
 --     )
 
-ZZ * MutableMatrix := (a,M) -> (a_(ring M)) * M
+-- the following is now in m2/mutablemat.m2
+--ZZ * MutableMatrix := (a,M) -> (a_(ring M)) * M
 
 --RingElement * MutableMatrix := (a,M) -> (
 --     << "warning: rewrite to be in the engine" << endl;
@@ -102,26 +106,26 @@ ZZ * MutableMatrix := (a,M) -> (a_(ring M)) * M
 --    addMultipleTo()
 --     )
 
-rank MutableMatrix := (M) -> rawLinAlgRank raw M
+--rank MutableMatrix := (M) -> rawLinAlgRank raw M
 
-determinant MutableMatrix := opts -> (M) -> (
-     R := ring M;
-     if hasEngineLinearAlgebra R then 
-       new R from rawLinAlgDeterminant raw M
-     else
-       error "determinant of mutable matrices over this ring is not implemented"
-     )
+--determinant MutableMatrix := opts -> (M) -> (
+--     R := ring M;
+--     if hasEngineLinearAlgebra R then 
+--       new R from rawLinAlgDeterminant raw M
+--     else
+--       error "determinant of mutable matrices over this ring is not implemented"
+--     )
 
-invert = method()
-invert MutableMatrix := (A) -> (
-     R := ring A;
-     if hasEngineLinearAlgebra R then (
-         if numRows A =!= numColumns A then error "expected square matrix";
-         map(R,rawLinAlgInvert(raw A))
-         )
-     else 
-       error "inverse of mutable matrices over this ring is not implemented"
-     )
+--invert = method()
+--invert MutableMatrix := (A) -> (
+--     R := ring A;
+--     if hasEngineLinearAlgebra R then (
+--         if numRows A =!= numColumns A then error "expected square matrix";
+--         map(R,rawLinAlgInvert(raw A))
+--         )
+--     else 
+--       error "inverse of mutable matrices over this ring is not implemented"
+--     )
 
 MutableMatrix ^ ZZ := (A, r) -> (
      if r == 0 then 
@@ -141,11 +145,11 @@ rowRankProfile MutableMatrix := (A) -> rawLinAlgRankProfile(raw A, true)
 columnRankProfile = method()
 columnRankProfile MutableMatrix := (A) -> rawLinAlgRankProfile(raw A, false)
 
-nullSpace = method(Options => {RightSide=>true})
-nullSpace(MutableMatrix) := opts -> (M) -> (
-     R := ring M;
-     map(R, rawLinAlgNullSpace(raw M, opts.RightSide))
-     )
+--nullSpace = method(Options => {RightSide=>true})
+--nullSpace(MutableMatrix) := opts -> (M) -> (
+--     R := ring M;
+--     map(R, rawLinAlgNullSpace(raw M, opts.RightSide))
+--     )
 
 solveLinear = method(Options => options nullSpace)
 solveLinear(MutableMatrix, MutableMatrix) := opts -> (A,B) -> (

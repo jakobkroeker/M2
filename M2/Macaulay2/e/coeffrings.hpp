@@ -302,6 +302,7 @@ class CoefficientRingRRR : public our_new_delete
 public:
   typedef RRR ring_type;
   typedef __mpfr_struct elem;
+  typedef  elem ElementType;
   const RRR *R;
 
   CoefficientRingRRR(const RRR *R0) : R(R0) {}
@@ -316,6 +317,8 @@ public:
   void init(elem& result) const { mpfr_init2(&result, R->get_precision()); }
 
   void set(elem &result, const elem& a) const { mpfr_set(&result, &a, GMP_RNDN); }
+
+  void set_from_int(elem &result, int a) const { mpfr_set_si(&result, a, GMP_RNDN); }
 
   void clear(elem& result) const { mpfr_clear(&result); }
 
@@ -484,18 +487,19 @@ class CoefficientRingCCC : public our_new_delete
 public:
   typedef CCC ring_type;
   typedef gmp_CC_struct elem; // components are re, im
+  typedef elem ElementType;
   typedef CoefficientRingRRR::elem real_elem;
 
   CCC *R;
 
   CoefficientRingCCC(CCC *R0) : R(R0) {}
 
-  void init_set(elem &result, elem a) const {
+  void init_set(elem &result, const elem& a) const {
     mpfc_init_set(&result,&a);
   }
 
   void set_zero(elem &result) const {
-    mpfc_init(&result, R->get_precision());
+    //    mpfc_init(&result, R->get_precision());
     mpfc_set_si(&result, 0);
   }
 
@@ -507,23 +511,25 @@ public:
     mpfc_clear(&result);
   }
 
-  void set(elem &result, elem a) const { mpfc_set(&result, &a); }
+  void set(elem &result, const elem& a) const { mpfc_set(&result, &a); }
 
-  bool is_equal(elem a, elem b ) const { return mpfc_is_equal(&a,&b); }
+  void set_from_int(elem &result, int a) const { mpfc_set_si(&result, a); }
 
-  bool is_zero(elem result) const { return mpfc_is_zero(&result); }
+  bool is_equal(const elem& a, const elem& b ) const { return mpfc_is_equal(&a,&b); }
 
-  void add(elem &result, elem a, elem b) const { mpfc_add(&result,&a,&b); }
+  bool is_zero(const elem& result) const { return mpfc_is_zero(&result); }
 
-  void negate(elem &result, elem a) const { mpfc_neg(&result,&a); }
+  void add(elem &result, const elem& a, const elem& b) const { mpfc_add(&result,&a,&b); }
 
-  void subtract(elem &result, elem a, elem b) const { mpfc_sub(&result,&a,&b); }
+  void negate(elem &result, const elem& a) const { mpfc_neg(&result,&a); }
 
-  void mult(elem &result, elem a, elem b) const { mpfc_mul(&result,&a,&b); }
+  void subtract(elem &result, const elem& a, const elem& b) const { mpfc_sub(&result,&a,&b); }
 
-  void invert(elem &result, elem a) const { mpfc_invert(&result, &a); }
+  void mult(elem &result, const elem& a, const elem& b) const { mpfc_mul(&result,&a,&b); }
 
-  void divide(elem &result, elem a, elem b) const { mpfc_div(&result,&a,&b); }
+  void invert(elem &result, const elem& a) const { mpfc_invert(&result, &a); }
+
+  void divide(elem &result, const elem& a, const elem& b) const { mpfc_div(&result,&a,&b); }
 #if 0
   void subtract_multiple(elem &result, elem a, elem b) const {
     // result -= a*b
@@ -532,15 +538,17 @@ public:
 
 
 #endif
-  void to_ring_elem(ring_elem &result, elem a) const
+  void to_ring_elem(ring_elem &result, const elem& a) const
   {
-    R->from_BigComplex(&a, result);
+    elem& b = const_cast<elem&>(a);
+    R->from_BigComplex(&b, result);
   }
 
   void from_ring_elem(elem &result, const ring_elem &a) const
   {
     gmp_CC b = reinterpret_cast<gmp_CC>(a.poly_val);
-    result = *b;
+    set(result, *b);
+    //    result = *b;
   }
 
   void swap(elem &a, elem &b) const
@@ -560,6 +568,7 @@ class CoefficientRingR : public our_new_delete
 public:
   typedef Ring ring_type;
   typedef ring_elem elem;
+  typedef elem ElementType;
 
   CoefficientRingR(const Ring *R0)
     : R(R0)

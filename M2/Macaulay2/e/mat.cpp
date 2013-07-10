@@ -6,25 +6,27 @@
 #include "mutablemat.hpp"
 
 #include "coeffrings.hpp"
-#include "coeffrings-zz.hpp"
+#include "aring-zz-gmp.hpp"
 
 #include "matrix-con.hpp"
 #include "matrix.hpp"
 
 #include "aring-RRR.hpp"
 #include "aring-zzp.hpp"
-#include "aring-ffpack.hpp"
+#include "aring-zzp-ffpack.hpp"
 #include "aring-m2-gf.hpp"
-#include "aring-gf.hpp"
+#include "aring-gf-givaro.hpp"
 #include "aring-RRR.hpp"
 #include "aring-glue.hpp"
 #include "aring-tower.hpp"
 #include "aring-zz-flint.hpp"
+#include "aring-qq-flint.hpp"
 #include "aring-zzp-flint.hpp"
+
+#include "QQ.hpp"
 
 #include "lapack.hpp"
 #include "dmat-LU.hpp"
-//#include "dmat-zzp-flint.hpp"
 
 #if 0
 // Considering this kind of code
@@ -129,12 +131,23 @@ MutableMatrix *MutableMatrix::zero_matrix(const Ring *R,
     {
       if (dense)
 	{
-	  return MutableMat< DMat<CoefficientRingZZ_NTL> >
+	  return MutableMat< DMat<M2::ARingZZGMP> >
 	    ::zero_matrix(globalZZ,globalZZ->get_ARing(),nrows,ncols);
 	}
       else
-	  return MutableMat< SMat<CoefficientRingZZ_NTL> >
+	  return MutableMat< SMat<M2::ARingZZGMP> >
 	    ::zero_matrix(globalZZ,globalZZ->get_ARing(),nrows,ncols);
+    }
+  if (R == globalQQ)
+    {
+      if (dense)
+	{
+	  return MutableMat< DMat<M2::ARingQQFlint> >
+	    ::zero_matrix(globalQQ,globalQQ->get_ARing(),nrows,ncols);
+	}
+      else
+	  return MutableMat< SMat<M2::ARingQQFlint> >
+	    ::zero_matrix(globalQQ,globalQQ->get_ARing(),nrows,ncols);
     }
   if (R->is_RRR())
     {
@@ -161,7 +174,7 @@ MutableMatrix *MutableMatrix::zero_matrix(const Ring *R,
       else
 	return MutableMat< SMat<Ring_RRR> >
 	  ::zero_matrix(R, ARRR->get_ARing(),nrows,ncols);
-}
+    }
   if (R->is_CCC())
     {
       const CCC *ACCC = R->cast_to_CCC();
@@ -188,7 +201,7 @@ MutableMatrix *MutableMatrix::zero_matrix(const Ring *R,
 	  ::zero_matrix(R, ACCC->get_ARing(),nrows,ncols);
     }
   // In this case, we just use ring elem arithmetic
-  const CoefficientRingR *cR = new CoefficientRingR(R);
+  const CoefficientRingR *cR = R->getCoefficientRingR();
   if (dense)
     return MutableMat< DMat<CoefficientRingR> >
       ::zero_matrix(R,cR,nrows,ncols);
@@ -222,8 +235,11 @@ MutableMatrix *MutableMatrix::from_matrix(const Matrix *m, bool prefer_dense)
   return result;
 }
 
+#if 0
 Matrix *MutableMatrix::to_matrix() const
 {
+#warning "reinstate MutableMatrix::to_matrix when iterator is available"
+#if 0
 #warning "FreeModule has limit size of int, not size_t"
   int nrows = static_cast<int>(n_rows());
   int ncols = static_cast<int>(n_cols());
@@ -246,7 +262,12 @@ Matrix *MutableMatrix::to_matrix() const
   delete i;
   result.compute_column_degrees();
   return result.to_matrix();
+#endif
+  return 0;
 }
+#endif
+
+
 
 void MutableMatrix::text_out(buffer &o) const
 {
@@ -721,7 +742,8 @@ template <typename T>
 MutableMatrix* MutableMat<T>::nullSpace(bool right_side) const
 {
   MutableMat<T>* ker = makeZeroMatrix(0,0);
-  mat.nullSpace(ker->mat, right_side);
+  //  mat.nullSpace(ker->mat, right_side);
+  LinAlg::nullSpace(mat, right_side, ker->mat); // ignore return value of nullSpace...
   return ker;
 }
 
@@ -731,30 +753,38 @@ std::pair<bool, MutableMatrix*> MutableMat<T>::solveLinear(const MutableMatrix* 
 { 
   const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
   MutableMat<T>* solns = makeZeroMatrix(0,0);
-  bool retval = mat.solveLinear(solns->mat, B1->mat, right_side);
+  bool retval = LinAlg::solveLinear(mat, B1->mat, right_side, solns->mat);
+  //  bool retval = mat.solveLinear(solns->mat, B1->mat, right_side);
   return std::pair<bool, MutableMatrix*>(retval, solns);
 }
 
 template <typename T>
 void MutableMat<T>::addMultipleTo(const MutableMatrix* A,
-                                            const MutableMatrix* B,
-                                            bool transposeA,
-                                            bool transposeB,
-                                            const RingElement* a,
-                                            const RingElement* b)
+                                  const MutableMatrix* B,
+                                  bool transposeA,
+                                  bool transposeB,
+                                  const RingElement* a,
+                                  const RingElement* b)
 {
-    std::cerr << "somewhere addMultipleTo" << std::endl;
+#warning "MutableMat::addMultipleTo needs def"
+#if 0
+  std::cerr << "somewhere addMultipleTo" << std::endl;
 
   const MutableMat<T>* A1 = A->cast_to_MutableMat<T>();
   const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
 
   typename T::ElementType fa, fb;
-  mat.get_CoeffRing()->from_ring_elem(fa, a->get_value());
-  mat.get_CoeffRing()->from_ring_elem(fb, b->get_value());
+  mat.ring().init(fa);
+  mat.ring().init(fb);
+  mat.ring().from_ring_elem(fa, a->get_value());
+  mat.ring().from_ring_elem(fb, b->get_value());
 
-  mat.addMultipleTo(A1->mat, B1->mat, transposeA, transposeB, fa, fb);
-  
-  return ;
+
+  //  mat.addMultipleTo(A1->mat, B1->mat, transposeA, transposeB, fa, fb);
+  //  LinAlg::addMultipleTo(mat, A1->mat, B1->mat, transposeA, transposeB, fa, fb);
+  mat.ring().clear(fa);
+  mat.ring().clear(fb);
+#endif
 }
 
 
@@ -780,13 +810,13 @@ MutableMatrix *M2::ARingZZp::makeMutableMatrix(const Ring* R, size_t nrows, size
     ::zero_matrix(R,this,nrows,ncols);
 }
 
-MutableMatrix *M2::ARingGF::makeMutableMatrix(const Ring* R, size_t nrows, size_t ncols, bool dense) const
+MutableMatrix *M2::ARingGFGivaro::makeMutableMatrix(const Ring* R, size_t nrows, size_t ncols, bool dense) const
 {
   if (dense)
-    return MutableMat< DMat<M2::ARingGF> >
+    return MutableMat< DMat<M2::ARingGFGivaro> >
       ::zero_matrix(R,this,nrows,ncols);
 
-  return MutableMat< SMat<M2::ARingGF> >
+  return MutableMat< SMat<M2::ARingGFGivaro> >
     ::zero_matrix(R,this,nrows,ncols);
 }
 
@@ -813,6 +843,11 @@ template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZ>(const Ring* Rgene
                                                  size_t nrows,
                                                  size_t ncols,
                                                  bool dense);
+template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingQQFlint>(const Ring* Rgeneral,
+                                                 const M2::ARingQQFlint* R,
+                                                 size_t nrows,
+                                                 size_t ncols,
+                                                 bool dense);
 template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZpFlint>(const Ring* Rgeneral,
                                                  const M2::ARingZZpFlint* R,
                                                  size_t nrows,
@@ -830,8 +865,8 @@ template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingZZpFFPACK>(const Ring
                                                  size_t nrows,
                                                  size_t ncols,
                                                  bool dense);
-template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingGF>(const Ring* Rgeneral,
-                                                 const M2::ARingGF* R,
+template MutableMatrix* M2::makeMutableZeroMatrix<M2::ARingGFGivaro>(const Ring* Rgeneral,
+                                                 const M2::ARingGFGivaro* R,
                                                  size_t nrows,
                                                  size_t ncols,
                                                  bool dense);
@@ -850,7 +885,7 @@ template class MutableMat< DMat<M2::ARingZZp> >;
 template class MutableMat< DMat<M2::ARingRRR> >;
 template class MutableMat< DMat<CoefficientRingRRR> >;
 template class MutableMat< DMat<CoefficientRingCCC> >;
-template class MutableMat< DMat<CoefficientRingZZ_NTL> >;
+template class MutableMat< DMat<M2::ARingZZGMP> >;
 template class MutableMat< DMat<CoefficientRingR> >;
 template class MutableMat< DMat<M2::ARingTower> >;
 
@@ -858,15 +893,15 @@ template class MutableMat< SMat<M2::ARingZZp> >;
 template class MutableMat< SMat<M2::ARingRRR> >;
 template class MutableMat< SMat<CoefficientRingRRR> >;
 template class MutableMat< SMat<CoefficientRingCCC> >;
-template class MutableMat< SMat<CoefficientRingZZ_NTL> >;
+template class MutableMat< SMat<M2::ARingZZGMP> >;
 template class MutableMat< SMat<CoefficientRingR> >;
 template class MutableMat< SMat<M2::ARingTower> >;
 
 template class MutableMat< DMat<M2::ARingZZpFFPACK> >;
 template class MutableMat< SMat<M2::ARingZZpFFPACK> >;
 
-template class MutableMat< DMat<M2::ARingGF> >;
-template class MutableMat< SMat<M2::ARingGF> >;
+template class MutableMat< DMat<M2::ARingGFGivaro> >;
+template class MutableMat< SMat<M2::ARingGFGivaro> >;
 
 template class MutableMat< DMat<M2::ARingGFM2> >;
 template class MutableMat< SMat<M2::ARingGFM2> >;

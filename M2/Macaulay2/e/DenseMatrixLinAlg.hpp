@@ -11,7 +11,7 @@
 #include "DenseMatrixDef.hpp"
 
 #ifdef HAVE_FFLAS_FFPACK
-#include "aring-ffpack.hpp"
+#include "aring-zzp-ffpack.hpp"
 #endif
 
 #ifdef HAVE_FLINT
@@ -23,7 +23,7 @@ template<typename RT> // ring type
 class DenseMatrixLinAlg
 {
 public:
-  typedef DenseMatrixDef<RT> MatType;
+  typedef DMat<RT> MatType;
   typedef typename MatType::ElementType ElementType;
   static size_t rank(const MatType& A)
   {

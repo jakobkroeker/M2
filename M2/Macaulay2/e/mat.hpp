@@ -23,7 +23,7 @@ protected:
   MutableMatrix() {}
   virtual ~MutableMatrix() {}
 public:
-#if 1
+#if 0
   // MESXXX
   class iterator : public our_new_delete
   {
@@ -36,7 +36,7 @@ public:
     virtual void copy_ring_elem(ring_elem &a) = 0;
   };
 #endif
-#if 1
+#if 0
   // MESXX
   virtual iterator * begin() const = 0;
 #endif
@@ -58,7 +58,7 @@ public:
   // If the ring is RR or CC, and dense is true, then MutableMatrixRR or
   // MutableMatrixCC will be used.
 
-  Matrix *to_matrix() const;
+  virtual Matrix *to_matrix() const = 0;
 
   void text_out(buffer &o) const;
 
@@ -190,6 +190,8 @@ public:
 
   virtual MutableMatrix * negate() const = 0;
 
+  virtual MutableMatrix /* or null */ * transpose() const = 0;
+
   ///////////////////////////////
   // Linear algebra /////////////
   ///////////////////////////////
@@ -277,7 +279,7 @@ public:
 
   // Return a matrix whose rows or columns solve either Ax = B (right_side=true)
   // or xA = B (right_side=false).  The first argument returned is false
-  // in this case.
+  // if there is no solution.
   virtual std::pair<bool, MutableMatrix*> solveLinear(const MutableMatrix* B, 
                                                       bool right_side) const { 
     return std::pair<bool, MutableMatrix*>(0,static_cast<MutableMatrix*>(NULL)); 
