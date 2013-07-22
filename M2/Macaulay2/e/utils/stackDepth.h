@@ -87,7 +87,7 @@ int get_stack_depth(void)
 
 */
 
-#ifdef __GNUC__
+#ifdef __GNUC__ //@jakob: needs a stronger ifdef
 #include <execinfo.h>
 #define BACKTRACE_BUFFER_SIZE 10000
  

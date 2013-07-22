@@ -97,7 +97,7 @@ namespace M2 {
       }
       
       static bool newpromote(const Ring* R, const ring_elem fR, 
-                      const ARingZZpFlint& S, ARingZZpFlint::ElementType& resultS)
+                      const M2::ARingZZpFlint& S, M2::ARingZZpFlint::ElementType& resultS)
       {
         return false;
       }

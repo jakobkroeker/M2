@@ -4,6 +4,7 @@
 #define _dmat_hpp_
 
 #include "engine-includes.hpp"
+#include <algorithm>
 
 #ifdef HAVE_FLINT
 #include <flint/arith.h>

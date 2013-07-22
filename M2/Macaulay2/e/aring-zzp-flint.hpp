@@ -10,7 +10,23 @@
 
 class RingMap;
 
-#ifdef HAVE_FLINT
+#if not defined(HAVE_FLINT)  
+namespace M2 {
+  
+  class ARingZZpFlint : public DummyRing
+  {
+  public:
+    static const RingID ringID = ring_ZZpFlint;
+    
+    typedef M2::ARingZZpFlint   ring_type;
+    
+    ARingZZpFlint(int charac) {}
+  };
+  
+};
+#else
+
+//#ifdef HAVE_FLINT
 #include "flint/arith.h"
 #include "flint/nmod_vec.h"
 
@@ -18,6 +34,7 @@ namespace M2 {
 /**
 \ingroup rings
 */
+
   class ARingZZpFlint : public RingInterface
   {
     // Integers mod p, implemented as
@@ -207,6 +224,7 @@ namespace M2 {
     size_t mCharac;  // not needed, as it is in mModulus
     mutable flint_rand_t mRandomState;
     fmpz_t mFmpzCharac;
+    
   };
 
 };
