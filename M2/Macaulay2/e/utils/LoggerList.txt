@@ -4,8 +4,14 @@ http://binglongx.wordpress.com/2010/07/23/logging-libraries-in-c/
 glog
 
 http://log4cpp.sourceforge.net/
+- seems to have multi-threading support 
+
+
 http://programmingknowledgeblog.blogspot.de/2013/01/build-and-run-sample-code-using-log4cpp.html
 
 http://log4cplus.sourceforge.net/
 http://boost-log.sourceforge.net/libs/log/doc/html/index.html
 http://logging.apache.org/log4cxx/
+
+
+pantheios

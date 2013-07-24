@@ -14,7 +14,7 @@ void bar(int par)
 __attribute__((noinline)) 
 void foo()
 {
-    M2Logger::log(1, "test sdf");
+    M2Logger::log(M2Logger::DEBUG, "test sdf");
     bar(5);
 
     M2Logger::warn( "leave " + std::string(__FUNCTION__) );
@@ -28,7 +28,7 @@ int main()
     adjust_ref_stack_depth(); // optional
 
     std::cout <<  std::endl;
-    M2Logger::setPriority(2);
+    M2Logger::setMinPriority(M2Logger::WARN);
     M2Logger::useStackDepth(true);
     M2Logger::log(1, "main");
 
@@ -41,7 +41,7 @@ int main()
     CallLogger::print();
     std::cout <<  std::endl;
 
-    std::cout <<    get_stack_depth() << std::endl;
+    std::cout << "   get_stack_depth() " <<  get_stack_depth() << std::endl;
 
 
     M2Logger::save("M2log.log");

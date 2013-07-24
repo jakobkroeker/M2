@@ -65,6 +65,16 @@ public:
   {
     throw exc::engine_error("'nullSpace' not implemented for this kind of matrix over this ring");
   }
+  
+    static void addMultipleTo( MatType& C, const MatType& A,const MatType& B )
+    {
+           throw exc::engine_error("'addMultipleTo' not implemented for this kind of matrix over this ring");
+    }
+    
+        static void subtractMultipleTo( MatType& C, const MatType& A,const MatType& B )
+    {
+           throw exc::engine_error("'subtractMultipleTo' not implemented for this kind of matrix over this ring");
+    }
 
   // To add?
   // transpose
@@ -98,6 +108,10 @@ public:
   static bool solveLinear(const MatType& A, const MatType& B, MatType& X);
 
   static size_t nullSpace(const MatType& A, MatType& result_nullspace);
+  
+  static void addMultipleTo( MatType& C, const MatType& A,const MatType& B );
+    
+  static void subtractMultipleTo( MatType& C, const MatType& A,const MatType& B );
 };
 #endif
 
@@ -149,6 +163,15 @@ public:
     long rank = fmpz_mat_nullspace(result_nullspace.fmpz_mat(), A.fmpz_mat());
     return (A.numColumns() - rank);
   }
+  
+   void  addMultipleTo(MatType &C,
+                                                      const MatType &A,
+                                                      const MatType &B,
+                                                      bool transposeA,
+                                                      bool transposeB,
+                                                      const ElementType &a,
+                                                      const ElementType &b)
+   
 };
 #endif
 

@@ -307,6 +307,7 @@ public:
     return ;
   }
 
+  // eventually set  addMultipleTo= 0.
   virtual void  addMultipleTo(const MutableMatrix* A,
                               const MutableMatrix* B)
   {

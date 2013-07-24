@@ -3,7 +3,10 @@
 /** @jakob:
  *   setPriority(-1) should work in a way, that the log statements do not cost anything ?
  *    
+ *  re: completely removing costs is not possible without recompiling
+ * 
   * **/
+
 
 #include <iostream>
 #include <cstdio>
@@ -21,6 +24,7 @@
 class M2Logger;
 class CallLogger;
 
+#ifndef NO_LOG
 
 template <class DerivedLogger>
 class M2LoggerT
@@ -32,6 +36,17 @@ class M2LoggerT
 
         const int minPriority = 0;
         const int maxPriority = 5;
+        
+      //  TRACE < DEBUG < INFO < WARN < ERROR < FATAL
+
+
+       const int FATAL = 5;
+       const int ERROR = 4;
+       const int WARN = 3;
+       const int INFO = 2;
+       const int DEBUG = 1;
+       const int TRACE = 0;
+       
 
 
         static DerivedLogger& get()
@@ -45,7 +60,7 @@ class M2LoggerT
         static bool hasMessage( const std::string & msg ) ;
                 
         static void useStackDepth( bool yn )  ;
-        static void setPriority  ( int newPriority );   
+        static void setMinPriority  ( int newPriority );   
 
         static void log( int priority, const std::string& message );
         static void info(   const std::string& message );
@@ -92,6 +107,8 @@ class M2LoggerT
                                         bUseStackDepth_m(false),
                                         priority_m(3)
         { };   
+        
+   /// the constructor design is explained at 
    // http://bytes.com/topic/c/answers/481312-private-constructors
     
     private:
@@ -101,6 +118,60 @@ class M2LoggerT
 
 
 #include "M2Logger.hpp"
+
+#else
+
+  template <class DerivedLogger>
+  class M2LoggerT {
+      
+    friend class M2Logger;
+    friend class CallLogger; // bad design; can we do better? ...
+    
+      public:
+	static inline int priority( ) {};
+        static inline bool useStackDepth() {};
+        static inline bool hasMessage( const std::string & msg ) {};
+                
+        static inline void useStackDepth( bool yn )  {};
+        static inline void setPriority  ( int newPriority ) {};
+
+        static inline void log( int priority, const std::string& message ){}; 
+        static inline void info(   const std::string& message ) {};
+        static inline void warn(  const std::string& message ) {};
+        static inline void error(   const std::string& message ) {};
+        static inline void debug(   const std::string& message ) {};
+           
+        static inline void save(std::string filename) {};
+        static inline void print()  {};
+           
+        inline bool  iHasMessage( const   std::string   & msg ) {};
+                
+        inline void iLog( int priority, const std::string& message ) {};
+        inline void iSave(std::string filename) {};
+
+        inline void iPrint( ) {};
+        
+        std::string name() const
+        {
+            return std::string("empty logger");
+        }
+        
+      
+        
+         protected:
+     
+            // M2LoggerT() : M2LoggerT("empty logger")    { }; 
+            M2LoggerT()   { }; 
+	    
+  private:
+	    M2LoggerT(std::string name)  
+        { };   
+  private:
+         M2LoggerT(M2LoggerT const&);       // Don't Implement
+        void operator=(M2LoggerT const&); // Don't implement
+  };
+#endif //NO_LOG
+  
 
         
 #define M2log M2Logger::log 
@@ -134,4 +205,7 @@ protected:
 
     friend class M2LoggerT;    
 };
+
+
+
 

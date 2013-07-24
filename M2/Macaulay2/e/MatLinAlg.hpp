@@ -186,6 +186,10 @@ public:
   static bool solveLinear(const Mat& A, const Mat& B, bool right_side, Mat& X, bool declare_A_is_invertible);
 
   static M2_arrayintOrNull rankProfile(const Mat& A, bool row_profile);
+  
+  static void addMultipleTo(  Mat& C, const Mat& A, const Mat& B);
+  
+   static void subtractMultipleTo(  Mat& C, const Mat& A, const Mat& B);
 };
 #endif
 

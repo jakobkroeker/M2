@@ -3,7 +3,7 @@
 #include <stdexcept>
 
 template <class DerivedLogger> 
-void    M2LoggerT<DerivedLogger>::setPriority(int newPriority)
+void    M2LoggerT<DerivedLogger>::setMinPriority(int newPriority)
 {
     DerivedLogger& logger = DerivedLogger::get();
     assert ( newPriority>=logger.minPriority&& newPriority<=logger.maxPriority );
