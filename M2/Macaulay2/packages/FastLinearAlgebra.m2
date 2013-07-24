@@ -476,31 +476,18 @@ testGFArithmetic GaloisField := (F) -> (
 	       assert(elemsR#i ^ N == lift(elemsF#i ^ N, R)));
      )
 
-testAddMultipleTo = method()
-testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+-- this test applied only to fflas-ffpack, and due to the fact that the matrix interface changed
+--  will not be callable/relevant anymore
+
+testAddMultipleToExtended = method()
+testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+
+     testAddMultipleTo(M3,M1,M2);
      kk := ring M3;
      numrows := numRows M3;
      numcols := numColumns M3;
      assert(ring M1 === kk);
      assert(ring M2 === kk);
-
-     A := mutableMatrix matrix M3;  -- 'copy' should work here!!
-     B := mutableMatrix matrix M3;
-     
-     addMultipleTo(A, M1, M2);
-     assert(A == M3 + M1*M2);
-    
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
-     addMultipleTo(A,  M1, transpose M2, TransposeB=>true);
-     assert(A == M3 + M1*M2);
-    
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
-     addMultipleTo(A, transpose M1,  M2, TransposeA=>true);
-     assert(A == M3 + M1*M2);
-
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!    
-     addMultipleTo(A, transpose M1, transpose M2, TransposeA=>true, TransposeB=>true);
-     assert(A == M3 + M1*M2);
 
      a := 0_kk;
      b := 0_kk;
@@ -521,25 +508,31 @@ testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> 
      a = 2_kk;
      b = 0_kk;
      addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
-     assert(A == b*M3 + a*M1*M2);
+       if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 1_kk;
      b = 1_kk;
      addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
-     assert(A == b*M3 + a*M1*M2);
+      if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 1_kk;
      addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
-     assert(A == b*M3 + a*M1*M2);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 2_kk;
      addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
-     assert(A == b*M3 + a*M1*M2);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
@@ -551,18 +544,47 @@ testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> 
          --print "A != b*M3 + a*M1*M2";
          --print (A-b*M3 + a*M1*M2);
      );
-     assert(A == b*M3 + a*M1*M2);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
    A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = (char ring M3 -1)_kk;
      b = 1_kk;
      addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
-     if not (A == b*M3 + a*M1*M2) then
-     (
-         --print "A != b*M3 + a*M1*M2";
-         --print (A-b*M3 + a*M1*M2);
-     );
-     assert(A == b*M3 + a*M1*M2);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+)
+
+testAddMultipleTo = method()
+testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+     kk := ring M3;
+     numrows := numRows M3;
+     numcols := numColumns M3;
+     assert(ring M1 === kk);
+     assert(ring M2 === kk);
+
+     A := mutableMatrix matrix M3;  -- 'copy' should work here!!
+     B := mutableMatrix matrix M3;
+     
+     addMultipleTo(A, M1, M2);
+     if not (A == M3 + M1*M2) then error("M3 + M1*M2 failed");
+     --assert(A == M3 + M1*M2);
+    
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleTo(A,  M1, transpose M2, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M2' failed");
+     --assert(A == M3 + M1*M2);
+    
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleTo(A, transpose M1,  M2, TransposeA=>true);
+     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M1' failed");
+     --assert(A == M3 + M1*M2);
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!    
+     addMultipleTo(A, transpose M1, transpose M2, TransposeA=>true, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M1',M2' failed")
+
+   
 
      )
 
