@@ -143,7 +143,11 @@ M2_arrayintOrNull MatLinAlg< DMat<M2::ARingZZpFFPACK> >::rankProfile(const Mat& 
   return profile;
 }
 
-bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat& B, bool right_side, Mat& X)
+bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, 
+                                                        const Mat& B, 
+                                                        bool right_side, 
+                                                        Mat& X, 
+                                                        bool declare_A_is_invertible)
 {
   std::cerr << "inside FFpackSolveLinear" << std::endl;
 
@@ -186,13 +190,9 @@ bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat&
 
 bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat& B, Mat& X)
 {
-  return solveLinear(A, B, true, X);
+  return solveLinear(A, B, true, X, false);
 }
 
-size_t MatLinAlg< DMat<M2::ARingZZpFFPACK> >::nullSpace(const Mat& mat, Mat& result_nullspace)
-{
-  return nullSpace(mat, true, result_nullspace);
-}
 #endif // HAVE_FFLAS_FFPACK
 
 //template<> 
@@ -276,6 +276,7 @@ engine_RawArrayIntPairOrNull rawLQUPFactorizationInPlace(MutableMatrix *A, M2_bo
 #include "dmat-LU.hpp"
 #include "lapack.hpp"
 #include "aring-zz-flint.hpp"
+#include "aring-qq.hpp"
 #include "aring-zzp-flint.hpp"
 #include "aring-zzp.hpp"
 #include "aring-tower.hpp"
@@ -284,6 +285,7 @@ engine_RawArrayIntPairOrNull rawLQUPFactorizationInPlace(MutableMatrix *A, M2_bo
 #include "aring-zz-gmp.hpp"
 #include "coeffrings.hpp"
 
+template class DMat<M2::ARingQQ>;
 template class DMat<M2::ARingZZGMP>;
 template class DMat<M2::ARingZZp>;
 template class DMat<M2::ARingTower>;
@@ -298,6 +300,7 @@ template class DMat<M2::ARingZZpFFPACK>;
 #ifdef HAVE_FLINT
 template class DMat<M2::ARingZZpFlint>;
 template class DMat<M2::ARingZZ>;
+template class DMat<M2::ARingQQFlint>;
 #endif
 
 template class DMat<M2::ARingGFGivaro>;

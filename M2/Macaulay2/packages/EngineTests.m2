@@ -2,9 +2,14 @@ newPackage(
         "EngineTests",
         Version => "0.1", 
         Date => "29 Aug 2011",
-        Authors => {{Name => "Mike Stillman", 
-                  Email => "", 
-                  HomePage => ""}},
+	    Authors => {
+            {Name => "Michael E. Stillman", 
+		        Email => "mike@math.cornell.edu", 
+		        HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
+	        {Name => "Jakob Kroeker", 
+		        Email => "Jakob Kröker <kroeker@math.uni-hannover.de>", 
+		        HomePage => "" }
+            },
         Headline => "a test suite for the Macaulay2 engine",
 	    PackageExports => {"FastLinearAlgebra"},
         DebuggingMode => true
@@ -331,7 +336,7 @@ testRank = (R) -> (
      m1 = mutableMatrix(QQ, 4, 4);
      fillMatrix m1 ;
      inverse m1; -- doesn't work yet
-     m2 = map(QQ, rawLinAlgInvert raw m1);
+     m2 = map(QQ, rawLinAlgInverse raw m1);
      m1*m2 == mutableIdentity(QQ, 4);
      )
 
@@ -354,8 +359,6 @@ testRankFailing = () -> (
      rawLinAlgRank raw m5; -- 
      )
      
--- linalg part1: mult, det, rank, inverse, 
-
 << "warning: not testing transpose of sparse mutable matrices yet" << endl;
 testTranspose = (R) -> (
     --M := mutableMatrix(R, 3, 5);
@@ -387,7 +390,7 @@ testDeterminant = (R) -> (
     assert(determinant M == M_(0,0) * M_(1,1) - M_(0,1) * M_(1,0));
     )
 
-testMult = (R) -> (
+testMultSimple = (R) -> (
     E := {{1_R, 2_R, 3_R}, {7_R, 0_R, 0_R}};
     m1 := mutableMatrix E;
     m2 := mutableMatrix transpose E;
@@ -395,12 +398,40 @@ testMult = (R) -> (
     assert(matrix(m2*m1) == (matrix m2) * (matrix m1));
     )
 
-testSolve = (R) -> (
+testMult = (R) -> (
+    testMultSimple R;
+    debug Core;
+    R = ZZp(33554393, "Choose"=>"FFPACK");
+    R1 = ZZp(33554393, "Choose"=>"FLINT");
+
+    N := 500;
+    M := mutableMatrix(R1, N, N);
+    fillMatrix M;
+    time M*M;
+    (matrix M) * (matrix M) == matrix(M*M)
+    )
+
+testSolveSimple = (R) -> (
     E := map(R^2, R^2, {{1, 4}, {2, 3}});
     B := map(R^2, R^1, {{3}, {7}});
     M := mutableMatrix E;
     B = mutableMatrix B;
-    rawLinAlgSolve(raw M,raw B, true) -- doesn't seem to be implemented yet.
+    X := map(R, rawLinAlgSolve(raw M,raw B, true));
+    assert(M*X-B == 0)
+    )
+
+testSolve = (R) -> (
+    testSolveSimple R;
+    -- now for more complicated examples
+    -- FAILING TEST: crashes
+    debug Core;
+    R = ZZp(101, "Choose"=>"FFPACK");
+    N := 90;
+    M := mutableMatrix(R, N, N);
+    fillMatrix M;
+    B := mutableMatrix(R, N, 5);
+    fillMatrix B;
+    time rawLinAlgSolve(raw M, raw B, true);
     )
 
 testNullspace = (R) -> (
@@ -410,8 +441,12 @@ testNullspace = (R) -> (
     M := mutableMatrix E;
     X := map(R, rawLinAlgNullSpace(raw M, true));
     assert((matrix M) * (matrix X) == 0);
-    M * X  -- crash!!
+    assert(M * X == 0);
     )
+
+testRankProfile = (R) -> (
+    error "not written yet"
+    );
 
 testMutableMatrices = (R) -> (
      << "testing " << describe R << endl;
@@ -420,7 +455,7 @@ testMutableMatrices = (R) -> (
      testops2 R; 
      testops3 R; 
      testops4 R;
-     testops5 R; -- Not working on 1.6 for R=ZZ
+     testops5 R;
      testTranspose R;
      --testRank R;
      << "tests passed for " << raw R << endl;
@@ -532,8 +567,8 @@ TEST ///
       );
 
   hasEngineLinearAlgebra(ZZ)
-  hasEngineLinearAlgebra(ZZFlint)
-  hasEngineLinearAlgebra(QQ)
+  assert hasEngineLinearAlgebra(ZZFlint)
+  assert hasEngineLinearAlgebra(QQ)
   assert hasEngineLinearAlgebra(ZZp(101, "Choose"=>"FLINT"))
   assert hasEngineLinearAlgebra(ZZp(101, "Choose"=>"FFPACK"))
   hasEngineLinearAlgebra(ZZ/101)
@@ -541,17 +576,46 @@ TEST ///
   hasEngineLinearAlgebra (GF(2^3, Strategy=>"Givaro"))
   hasEngineLinearAlgebra (GF(2^3, Strategy=>"New"))
 
-  hasLinAlgRank ZZ  -- NO
-  hasLinAlgRank QQ  -- NO
+  --hasLinAlgRank ZZ  -- NO
+  --hasLinAlgRank QQ  -- NO
   hasLinAlgRank (ZZp(101, "Choose"=>"FLINT")) -- yes, this one works!
   hasLinAlgRank (ZZp(101, "Choose"=>"FFPACK")) -- yes, this one works!
-  hasLinAlgRank (ZZp(101, "Choose"=>null))
+  --hasLinAlgRank (ZZp(101, "Choose"=>null)) -- NO
 
   debug Core
   initializeEngineLinearAlgebra QQ
-
-
 ///
+
+TEST ///
+  debug Core
+
+  hasLinAlg1 = (fcn, R) -> (
+      M = mutableMatrix(R, 4, 4);
+      fillMatrix M;
+      fcn raw M
+      );
+
+  hasLinAlg = (fcn, R) -> (
+      M = mutableMatrix(R, 4, 4);
+      fillMatrix M;
+      try (fcn raw M; true) else false
+      );
+
+  R = ZZp(101, "Choose"=>"FFPACK")
+  hasLinAlg1(rawLinAlgDeterminant, R)
+  assert hasLinAlg(rawLinAlgDeterminant, R)
+  assert hasLinAlg(rawLinAlgInverse, R)
+
+  R1 = ZZp(101, "Choose"=>"FLINT")
+  assert hasLinAlg(rawLinAlgDeterminant, R1)
+
+  --hasLinAlg(rawLinAlgDeterminant, ZZ/101)
+  --hasLinAlg(rawLinAlgDeterminant, QQ)
+  --hasLinAlg(rawLinAlgDeterminant, ZZ)
+  
+  
+///
+
 TEST ///
 -- of rawDiscreteLog
 debug Core

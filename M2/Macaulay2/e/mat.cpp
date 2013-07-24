@@ -20,7 +20,7 @@
 #include "aring-glue.hpp"
 #include "aring-tower.hpp"
 #include "aring-zz-flint.hpp"
-#include "aring-qq-flint.hpp"
+#include "aring-qq.hpp"
 #include "aring-zzp-flint.hpp"
 
 #include "QQ.hpp"
@@ -138,17 +138,19 @@ MutableMatrix *MutableMatrix::zero_matrix(const Ring *R,
 	  return MutableMat< SMat<M2::ARingZZGMP> >
 	    ::zero_matrix(globalZZ,globalZZ->get_ARing(),nrows,ncols);
     }
+#if defined(HAVE_FLINT)
   if (R == globalQQ)
     {
       if (dense)
 	{
-	  return MutableMat< DMat<M2::ARingQQFlint> >
+	  return MutableMat< DMat<M2::ARingQQ> >
 	    ::zero_matrix(globalQQ,globalQQ->get_ARing(),nrows,ncols);
 	}
       else
-	  return MutableMat< SMat<M2::ARingQQFlint> >
+	  return MutableMat< SMat<M2::ARingQQ> >
 	    ::zero_matrix(globalQQ,globalQQ->get_ARing(),nrows,ncols);
     }
+#endif
   if (R->is_RRR())
     {
       const RRR * ARRR = R->cast_to_RRR();
@@ -753,7 +755,7 @@ std::pair<bool, MutableMatrix*> MutableMat<T>::solveLinear(const MutableMatrix* 
 { 
   const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
   MutableMat<T>* solns = makeZeroMatrix(0,0);
-  bool retval = LinAlg::solveLinear(mat, B1->mat, right_side, solns->mat);
+  bool retval = LinAlg::solveLinear(mat, B1->mat, right_side, solns->mat, false);
   //  bool retval = mat.solveLinear(solns->mat, B1->mat, right_side);
   return std::pair<bool, MutableMatrix*>(retval, solns);
 }

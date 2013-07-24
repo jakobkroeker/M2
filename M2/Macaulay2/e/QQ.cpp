@@ -8,7 +8,6 @@
 #include "relem.hpp"
 #include "ringmap.hpp"
 #include "gbring.hpp"
-#include "aring-qq-flint.hpp"
 
 bool QQ::initialize_QQ()
 {
@@ -23,7 +22,7 @@ bool QQ::initialize_QQ()
   oneV = from_int(1);
   minus_oneV = from_int(-1);
 
-  mARing = new M2::ARingQQFlint;
+  mARing = new M2::ARingQQ;
 
   return true;
 }

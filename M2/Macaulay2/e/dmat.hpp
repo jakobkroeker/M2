@@ -3,6 +3,9 @@
 #ifndef _dmat_hpp_
 #define _dmat_hpp_
 
+#include <utility>
+#include <algorithm>
+
 #include "engine-includes.hpp"
 #include <algorithm>
 
@@ -11,7 +14,7 @@
 #include <flint/nmod_mat.h>
 #include <flint/fmpq_mat.h>
 #include "aring-zz-flint.hpp"
-#include "aring-qq-flint.hpp"
+#include "aring-qq.hpp"
 #include "aring-zzp-flint.hpp"
 #endif
 

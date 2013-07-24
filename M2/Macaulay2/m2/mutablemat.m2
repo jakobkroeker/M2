@@ -241,26 +241,31 @@ rank MutableMatrix := (M) -> rawLinAlgRank raw M
 
 determinant MutableMatrix := opts -> (M) -> (
      R := ring M;
-     if hasEngineLinearAlgebra R then 
-       new R from rawLinAlgDeterminant raw M
-     else
-       error "determinant of mutable matrices over this ring is not implemented"
+     new R from rawLinAlgDeterminant raw M
      )
 
 inverse MutableMatrix := (A) -> (
      R := ring A;
-     if hasEngineLinearAlgebra R then (
-         if numRows A =!= numColumns A then error "expected square matrix";
-         map(R,rawLinAlgInvert(raw A))
-         )
-     else 
-       error "inverse of mutable matrices over this ring is not implemented"
+     if numRows A =!= numColumns A then error "expected square matrix";
+     map(R,rawLinAlgInverse raw A)
      )
 
 nullSpace = method()
 nullSpace(MutableMatrix) := (M) -> (
      R := ring M;
      map(R, rawLinAlgNullSpace raw M)
+     )
+
+MutableMatrix ^ ZZ := (A, r) -> (
+     if r == 0 then 
+       return mutableIdentity(ring A, numRows A);
+     if r < 0 then (
+	  r = -r;
+	  A = inverse A;
+	  );
+     result := A;
+     if r > 1 then for i from 2 to r do result = result * A;
+     result     
      )
      
 -- Local Variables:
