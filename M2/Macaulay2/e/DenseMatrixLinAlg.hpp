@@ -164,13 +164,6 @@ public:
     return (A.numColumns() - rank);
   }
   
-   void  addMultipleTo(MatType &C,
-                                                      const MatType &A,
-                                                      const MatType &B,
-                                                      bool transposeA,
-                                                      bool transposeB,
-                                                      const ElementType &a,
-                                                      const ElementType &b)
    
 };
 #endif
