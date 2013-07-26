@@ -36,7 +36,7 @@ export {
    constructMacaulayGF,
    constructMacaulayZZp,
    testField,
-
+   mult,
    testAddMultipleTo,
      
    RightSide,
@@ -47,6 +47,7 @@ export {
    rowRankProfile,
    columnRankProfile,
    addMultipleTo,
+   addMultipleToExt,
    solveLinear,
    TransposeA,
    TransposeB,
@@ -103,7 +104,7 @@ isPrimeField Ring := (R) -> (
 --     << "warning: rewrite to be in the engine" << endl;
 --     mutableMatrix(a*(matrix M))
 --    C:=mutableMatrix(
---    addMultipleTo()
+--    addMultipleToExt()
 --     )
 
 --rank MutableMatrix := (M) -> rawLinAlgRank raw M
@@ -159,13 +160,33 @@ solveLinear(MutableMatrix, MutableMatrix) := opts -> (A,B) -> (
      map(R,rawLinAlgSolve(raw A,raw B,opts.RightSide))
      )
 
-addMultipleTo = method(Options => {
+
+addMultipleTo = method()
+
+addMultipleTo(MutableMatrix,MutableMatrix,MutableMatrix) :=  (C,A,B) -> (
+     R := ring C;
+     if ring A =!= ring C or ring B =!= ring C then 
+       error "expected matrices over the same ring";
+      m :=  numRows A;
+      n := numColumns B;    
+      k:=numColumns A;
+      k2:=numRows B;
+   
+      if ( k!=k2 or numRows C != m or numColumns C != n ) then 
+        error("matrix sizes are not compatible!");
+        print("calling rawLinAlgAddMult");
+      rawLinAlgAddMult(raw C, raw A, raw B   );
+     C)
+
+
+addMultipleToExt = method(Options => {
 	  TransposeA => false, 
 	  TransposeB => false, 
 	  Alpha => null, 
 	  Beta => null})
 
-addMultipleTo(MutableMatrix,MutableMatrix,MutableMatrix) := opts -> (C,A,B) -> (
+addMultipleToExt(MutableMatrix,MutableMatrix,MutableMatrix) := opts -> (C,A,B) -> (
+     error("not implemented any more");
      R := ring C;
      if ring A =!= ring C or ring B =!= ring C then 
        error "expected matrices over the same ring";
@@ -184,15 +205,35 @@ addMultipleTo(MutableMatrix,MutableMatrix,MutableMatrix) := opts -> (C,A,B) -> (
       if ( k!=k2 or numRows C != m or numColumns C != n ) then 
         error("matrix sizes are not compatible!");
 --
-     rawLinAlgAddMultipleTo(raw C, raw A, raw B,
-	  opts.TransposeA, 
-	  opts.TransposeB, 
-	  raw a, raw b);
+        print("calling rawLinAlgAddMult");
+     -- rawLinAlgaddMultipleToExt(raw C, raw A, raw B, opts.TransposeA,   opts.TransposeB,   raw a, raw b       );
      C)
+
+mult = method()
+mult(MutableMatrix,MutableMatrix) :=  ( A,B) -> (
+     R := ring A;
+     if ring A =!= ring B  then 
+       error "expected matrices over the same ring";
+   
+--
+      m :=  numRows A;
+      n := numColumns B;    
+ 
+--
+      k:=numColumns A;
+      k2:=numRows B;
+ 
+      if ( k!=k2  ) then 
+        error("matrix sizes are not compatible!");
+--
+     print("calling rawLinAlgAddMult");
+     rawC := rawLinAlgMult(raw A, raw B );
+     map(ring A,rawC) 
+    )
 
 --MutableMatrix * MutableMatrix := (A,B) -> (
 --     C := mutableMatrix(ring A, numRows A, numColumns B, Dense=>true);
---     addMultipleTo(C,A,B)
+--     addMultipleToExt(C,A,B)
 --     )
 
 characteristicPolynomial = method()
@@ -481,12 +522,31 @@ testGFArithmetic GaloisField := (F) -> (
 testAddMultipleToExtended = method()
 testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
 
-     testAddMultipleTo(M3,M1,M2);
+
+  testAddMultipleTo(M3,M1,M2);
+
      kk := ring M3;
      numrows := numRows M3;
      numcols := numColumns M3;
      assert(ring M1 === kk);
      assert(ring M2 === kk);
+
+
+     A := mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleToExt(A,  M1, transpose M2, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M2' failed");
+     --assert(A == M3 + M1*M2);
+    
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleToExt(A, transpose M1,  M2, TransposeA=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M1' failed");
+     --assert(A == M3 + M1*M2);
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!    
+     addMultipleToExt(A, transpose M1, transpose M2, TransposeA=>true, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M1',M2' failed");
+
+   
 
      a := 0_kk;
      b := 0_kk;
@@ -494,19 +554,19 @@ testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 0_kk;
      b = 0_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      assert(A == b*M3 + a*M1*M2);
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 1_kk;
      b = 0_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      assert(A == b*M3 + a*M1*M2);
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 0_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
        if not (A == b*M3 + a*M1*M2) then 
          error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
@@ -514,14 +574,14 @@ testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 1_kk;
      b = 1_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
       if not (A == b*M3 + a*M1*M2) then 
          error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 1_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      if not (A == b*M3 + a*M1*M2) then 
          error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
@@ -529,7 +589,7 @@ testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 2_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      if not (A == b*M3 + a*M1*M2) then 
          error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 
@@ -537,7 +597,7 @@ testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1
      A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = 2_kk;
      b = 3_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      if not (A == b*M3 + a*M1*M2) then
      (
          --print "A != b*M3 + a*M1*M2";
@@ -549,13 +609,13 @@ testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1
    A = mutableMatrix matrix M3;  -- 'copy' should work here!!
      a = (char ring M3 -1)_kk;
      b = 1_kk;
-     addMultipleTo(A, M1, M2, Alpha=>a, Beta=>b);
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
      if not (A == b*M3 + a*M1*M2) then 
          error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
 )
 
-testAddMultipleTo = method()
-testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+testaddMultipleTo = method()
+testaddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
      kk := ring M3;
      numrows := numRows M3;
      numcols := numColumns M3;
@@ -569,19 +629,7 @@ testAddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> 
      if not (A == M3 + M1*M2) then error("M3 + M1*M2 failed");
      --assert(A == M3 + M1*M2);
     
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
-     addMultipleTo(A,  M1, transpose M2, TransposeB=>true);
-     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M2' failed");
-     --assert(A == M3 + M1*M2);
-    
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
-     addMultipleTo(A, transpose M1,  M2, TransposeA=>true);
-     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M1' failed");
-     --assert(A == M3 + M1*M2);
-
-     A = mutableMatrix matrix M3;  -- 'copy' should work here!!    
-     addMultipleTo(A, transpose M1, transpose M2, TransposeA=>true, TransposeB=>true);
-     if not (A == M3 + M1*M2) then error("testAddMultipleTo: transposing M1',M2' failed")
+  
 
    
 
@@ -607,8 +655,20 @@ TEST ///
     M2 = mutableMatrix random(kk^200, kk^300)
     M3 = mutableMatrix random(kk^200, kk^500)
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
 ///
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp 33500479
+    M1 = mutableMatrix random(kk^300, kk^500)
+    M2 = mutableMatrix random(kk^200, kk^300)
+    M3 = mutableMatrix random(kk^200, kk^500)
+
+    testaddMultipleTo(M3,M2,M1)
+///
+
 
 TEST ///
 -- addMultipleTo
@@ -618,7 +678,7 @@ TEST ///
     M2 = mutableMatrix random(kk^200, kk^300);
     M3 = mutableMatrix random(kk^200, kk^100);
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
     time addMultipleTo(M3, M2, M1);
 ///
 
@@ -794,7 +854,7 @@ TEST ///
     assert(columnRankProfile(M11) == {0,1,2})
 
     C = mutableMatrix(kk,3,3)
-    testAddMultipleTo(C,M1,M2)
+    testaddMultipleToExt(C,M1,M2)
 ///
 
 TEST ///
@@ -805,7 +865,7 @@ TEST ///
     M2 = mutableMatrix random(kk^2, kk^3)
     M3 = mutableMatrix random(kk^2, kk^5)
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
 ///
 
 
@@ -818,7 +878,7 @@ TEST ///
     M2 = mutableMatrix random(kk^2, kk^3)
     M3 = mutableMatrix random(kk^2, kk^5)
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
 ///
 
 TEST ///
@@ -829,7 +889,7 @@ TEST ///
     M2 = mutableMatrix random(kk^200, kk^300);
     M3 = mutableMatrix random(kk^200, kk^500);
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
     time addMultipleTo(M3, M2, M1);
 ///
 
@@ -841,7 +901,7 @@ TEST ///
     M2 = mutableMatrix random(kk^200, kk^300);
     M3 = mutableMatrix random(kk^200, kk^500);
 
-    testAddMultipleTo(M3,M2,M1)
+    testaddMultipleTo(M3,M2,M1)
     time addMultipleTo(M3, M2, M1);
 ///
 
@@ -1099,19 +1159,19 @@ A = mutableMatrix random(kk^3, kk^4);
 B = mutableMatrix random(kk^4, kk^7);
 
 C0 = matrix C
-addMultipleTo(C,A,B,Alpha=>3_kk, Beta=>-1_kk)
+addMultipleToExt(C,A,B,Alpha=>3_kk, Beta=>-1_kk)
 assert(-C0 + 3*(matrix A)*(matrix B) == matrix C)
 
 C = mutableMatrix C0
-addMultipleTo(C,mutableMatrix transpose matrix A, B,Alpha=>3_kk, Beta=>-1_kk, TransposeA=>true)
+addMultipleToExt(C,mutableMatrix transpose matrix A, B,Alpha=>3_kk, Beta=>-1_kk, TransposeA=>true)
 assert(-C0 + 3*(matrix A)*(matrix B) == matrix C)
 
 C = mutableMatrix C0
-addMultipleTo(C,A,mutableMatrix transpose matrix B,Alpha=>3_kk, Beta=>-1_kk, TransposeB=>true)
+addMultipleToExt(C,A,mutableMatrix transpose matrix B,Alpha=>3_kk, Beta=>-1_kk, TransposeB=>true)
 assert(-C0 + 3*(matrix A)*(matrix B) == matrix C)
 
 C = mutableMatrix C0
-addMultipleTo(C,mutableMatrix transpose matrix A,
+addMultipleToExt(C,mutableMatrix transpose matrix A,
      mutableMatrix transpose matrix B,
      Alpha=>3_kk, 
      Beta=>-1_kk, 
@@ -2046,7 +2106,7 @@ XXXXXXXXXXXXXX
 --         over ZZ: Hermite, Smith, LLL
 --         over fields: rational decomposition of a matrix, ...
 -- 17 May 2012
---    1. JAKOB: find bugs in addMultipleTo DONE
+--    1. JAKOB: find bugs in addMultipleToExt DONE
 --    2. JAKOB: read about sparse matrices in linbox, how to use them.  Then: implement SMat type matrix type using their type.
 --    3. MIKE: Place characteristicPolynomial, minimalPolynomial into DMat, SMat, ...
 --    4. MIKE: internal routines for +, scalar mult and transpose (and perhaps submatrices), in DMat, SMat, ...  and use these at top level.
