@@ -262,6 +262,14 @@ public:
   {
     throw exc::engine_error("'rankProfile' not implemented for this kind of matrix over this ring");
   }
+
+  static void addMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'addMultipleTo' not implemented for this kind of matrix over this ring");
+  }
+  
+   static void subtractMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'subtractMultipleTo' not implemented for this kind of matrix over this ring");
+  }
 };
 #endif
 
@@ -329,6 +337,15 @@ public:
     //TODO: WRITE ME
     throw exc::engine_error("'rankProfile' not implemented for this kind of matrix over this ring");
   }
+
+  static void addMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'addMultipleTo' not implemented for this kind of matrix over this ring");
+  }
+  
+   static void subtractMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'subtractMultipleTo' not implemented for this kind of matrix over this ring");
+  }
+
 };
 #endif
 
@@ -406,6 +423,14 @@ public:
   {
     //TODO: WRITE ME
     throw exc::engine_error("'rankProfile' not implemented for this kind of matrix over this ring");
+  }
+
+ static void addMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'addMultipleTo' not implemented for this kind of matrix over this ring");
+  }
+  
+   static void subtractMultipleTo(  Mat& C, const Mat& A, const Mat& B) {
+    throw exc::engine_error("'subtractMultipleTo' not implemented for this kind of matrix over this ring");
   }
 };
 #endif
