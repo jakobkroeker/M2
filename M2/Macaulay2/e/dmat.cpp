@@ -45,6 +45,7 @@ void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::mult(const Mat& A, const Mat& B, Mat
     // This one is a bit harder, as we need to be careful about rows/columns, and the ffpack routine
     // is so general.
     // We assume that result_product has been just created
+    std::cout << "entering MatLinAlg< DMat<M2::ARingZZpFFPACK> > mult" << std::endl; 
 
     FFLAS::FFLAS_TRANSPOSE tA = FFLAS::FflasNoTrans;
     FFLAS::FFLAS_TRANSPOSE tB = FFLAS::FflasNoTrans;
@@ -58,6 +59,10 @@ void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::mult(const Mat& A, const Mat& B, Mat
     ElementType a;
     C.ring().init(a);
     C.ring().set_from_int(a, 1);
+
+    assert( C.numRows()==A.numRows() );
+    assert( C.numColumns()==B.numColumns() );
+    std::cout << "ok so far. calling fgemm" << std::endl;
     FFLAS::fgemm( C.ring().field(),
                   tB, tA,
                   m,n,k,
@@ -208,6 +213,8 @@ bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat&
        connected to rawFFPackAddMultipleTo, MES
     */
   {
+ std::cout << "entering ARingZZpFFPACKAddMultipleTo" << std::endl; 
+ 
    typedef DMat<M2::ARingZZpFFPACK> Mat;
     FFLAS::FFLAS_TRANSPOSE tA = (transposeA ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
     FFLAS::FFLAS_TRANSPOSE tB = (transposeB ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
@@ -225,7 +232,8 @@ bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat&
   
     Mat copyA(A);
     Mat copyB(B);
-  
+    std::cout << "copy succeeded"<< std::endl; 
+
     FFLAS::fgemm( A.ring().field(),
                   tA, tB,
                   m,n,k,
