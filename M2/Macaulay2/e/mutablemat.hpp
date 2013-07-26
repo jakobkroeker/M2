@@ -1,4 +1,6 @@
 // Copyright 2005-2012  Michael E. Stillman
+// #deprecated
+
 
 #ifndef _mutable_mat_hpp_
 #define _mutable_mat_hpp_
@@ -699,12 +701,60 @@ public:
      where op(A) = A or transpose(A), depending on transposeA
      where op(B) = B or transpose(B), depending on transposeB
   */
-  virtual void addMultipleTo(const MutableMatrix* A,
+  /*virtual void addMultipleTo(const MutableMatrix* A,
                                              const MutableMatrix* B,
                                              bool transposeA,
                                              bool transposeB,
                                              const RingElement* a,
-                                             const RingElement* b);
+                                             const RingElement* b);*/
+
+ virtual void addMultipleTo(const MutableMatrix* A,
+                                             const MutableMatrix* B
+                                         )
+ {
+     const Mat *B1 = B->coerce<Mat>();
+    if (B1 == NULL) 
+      {
+        ERROR("expected matrices with the same ring and sparsity");
+        return ;
+      }
+    if (B->get_ring() != get_ring())
+      {
+        ERROR("expected matrices with the same ring");
+        return ;
+      }
+    if (  B1->numColumns() != n_cols())
+      {
+        ERROR("expected matrix B to have same columns as ");
+        return ;
+      }
+
+    const Mat *A1 = A->coerce<Mat>();
+    if (A1 == NULL) 
+      {
+        ERROR("expected matrices with the same ring and sparsity");
+        return ;
+      }
+    if (A->get_ring() != get_ring())
+      {
+        ERROR("expected matrices with the same ring");
+        return ;
+      }
+    if (A1->numRows() != n_rows()  )
+      {
+        ERROR("expected matrices of the same shape");
+        return ;
+      }
+ std::cout << "calling LinAlg::addMultipleTo(mat,A,B)"<< std::endl;
+      LinAlg::addMultipleTo(mat,*A1,*B1);
+     return;
+ }
+
+ virtual void  subtractMultipleTo(const MutableMatrix* A,
+                                   const MutableMatrix* B)
+{
+  std::cerr << "subtractMultipleTo not implemented now" << std::endl;
+}
 
   virtual MutableMatrix /* or null */ * mult(const MutableMatrix *B) const;
 };
