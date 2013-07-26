@@ -296,7 +296,7 @@ public:
      where op(A) = A or transpose(A), depending on transposeA
      where op(B) = B or transpose(B), depending on transposeB
   */
-  virtual void  addMultipleTo(const MutableMatrix* A,
+  /*virtual void  addMultipleTo(const MutableMatrix* A,
                               const MutableMatrix* B,
                               bool transposeA,
                               bool transposeB,
@@ -305,7 +305,7 @@ public:
   {
     //std::cerr << "MutableMatrix : rawLinAlgAddMultipleTo" << std::endl;
     return ;
-  }
+  }*/
 
   // eventually set  addMultipleTo= 0.
   virtual void  addMultipleTo(const MutableMatrix* A,
