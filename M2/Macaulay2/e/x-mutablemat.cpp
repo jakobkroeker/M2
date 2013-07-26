@@ -1092,8 +1092,8 @@ MutableMatrix* /* or null */ rawLinAlgAddMultipleTo(MutableMatrix* C,
                                                     const RingElement* a,
                                                     const RingElement* b)
 {
-    std::cerr << "x-mutableMat : rawLinAlgAddMultipleTo" << std::endl;
-    C->addMultipleTo(A,B,transposeA,transposeB,a,b);
+    std::cerr << "x-mutableMat : rawLinAlgAddMultipleTo not implemented any more" << std::endl;
+   // C->addMultipleTo(A,B,transposeA,transposeB,a,b);
     return C;
 }
 
@@ -1103,6 +1103,7 @@ void rawLinAlgAddMult(MutableMatrix* C,
 {
 #warning "write rawLinAlgAddMult"
   //TODO: write me
+  std::cout << "x-MutableMat. addMultipleTo " << std::endl;
   C->addMultipleTo(A,B);
 }
 
@@ -1118,6 +1119,8 @@ void rawLinAlgSubMult(MutableMatrix* C,
 MutableMatrix* /* or null */ rawLinAlgMult(const MutableMatrix* A,
                                            const MutableMatrix* B)
 {
+
+  std::cout << " calling rawLinAlgMult " << std::endl;
   try {
     return A->mult(B);
   }
