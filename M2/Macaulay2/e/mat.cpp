@@ -760,6 +760,9 @@ std::pair<bool, MutableMatrix*> MutableMat<T>::solveLinear(const MutableMatrix* 
   return std::pair<bool, MutableMatrix*>(retval, solns);
 }
 
+
+
+/*
 template <typename T>
 void MutableMat<T>::addMultipleTo(const MutableMatrix* A,
                                   const MutableMatrix* B,
@@ -788,7 +791,7 @@ void MutableMat<T>::addMultipleTo(const MutableMatrix* A,
   mat.ring().clear(fb);
 #endif
 }
-
+*/
 
 /////////////////////////////////////////
 #if 0
