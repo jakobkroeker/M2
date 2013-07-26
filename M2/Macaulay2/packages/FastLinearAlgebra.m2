@@ -205,7 +205,7 @@ addMultipleToExt(MutableMatrix,MutableMatrix,MutableMatrix) := opts -> (C,A,B) -
       if ( k!=k2 or numRows C != m or numColumns C != n ) then 
         error("matrix sizes are not compatible!");
 --
-        print("calling rawLinAlgAddMult");
+        print("calling rawLinAlgaddMultipleToExt");
      -- rawLinAlgaddMultipleToExt(raw C, raw A, raw B, opts.TransposeA,   opts.TransposeB,   raw a, raw b       );
      C)
 

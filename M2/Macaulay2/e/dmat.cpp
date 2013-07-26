@@ -212,9 +212,10 @@ bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat&
        where op(B) = B or transpose(B), depending on transposeB
        connected to rawFFPackAddMultipleTo, MES
     */
-  {
- std::cout << "entering ARingZZpFFPACKAddMultipleTo" << std::endl; 
+ {
+    std::cout << "entering ARingZZpFFPACKAddMultipleTo" << std::endl; 
  
+
    typedef DMat<M2::ARingZZpFFPACK> Mat;
     FFLAS::FFLAS_TRANSPOSE tA = (transposeA ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
     FFLAS::FFLAS_TRANSPOSE tB = (transposeB ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
@@ -232,6 +233,7 @@ bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat&
   
     Mat copyA(A);
     Mat copyB(B);
+
     std::cout << "copy succeeded"<< std::endl; 
 
     FFLAS::fgemm( A.ring().field(),

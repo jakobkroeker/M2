@@ -701,60 +701,15 @@ public:
      where op(A) = A or transpose(A), depending on transposeA
      where op(B) = B or transpose(B), depending on transposeB
   */
-  /*virtual void addMultipleTo(const MutableMatrix* A,
-                                             const MutableMatrix* B,
-                                             bool transposeA,
-                                             bool transposeB,
-                                             const RingElement* a,
-                                             const RingElement* b);*/
+
+
 
  virtual void addMultipleTo(const MutableMatrix* A,
-                                             const MutableMatrix* B
-                                         )
- {
-     const Mat *B1 = B->coerce<Mat>();
-    if (B1 == NULL) 
-      {
-        ERROR("expected matrices with the same ring and sparsity");
-        return ;
-      }
-    if (B->get_ring() != get_ring())
-      {
-        ERROR("expected matrices with the same ring");
-        return ;
-      }
-    if (  B1->numColumns() != n_cols())
-      {
-        ERROR("expected matrix B to have same columns as ");
-        return ;
-      }
-
-    const Mat *A1 = A->coerce<Mat>();
-    if (A1 == NULL) 
-      {
-        ERROR("expected matrices with the same ring and sparsity");
-        return ;
-      }
-    if (A->get_ring() != get_ring())
-      {
-        ERROR("expected matrices with the same ring");
-        return ;
-      }
-    if (A1->numRows() != n_rows()  )
-      {
-        ERROR("expected matrices of the same shape");
-        return ;
-      }
- std::cout << "calling LinAlg::addMultipleTo(mat,A,B)"<< std::endl;
-      LinAlg::addMultipleTo(mat,*A1,*B1);
-     return;
- }
+                            const MutableMatrix* B
+                                         );
 
  virtual void  subtractMultipleTo(const MutableMatrix* A,
-                                   const MutableMatrix* B)
-{
-  std::cerr << "subtractMultipleTo not implemented now" << std::endl;
-}
+                                   const MutableMatrix* B);
 
   virtual MutableMatrix /* or null */ * mult(const MutableMatrix *B) const;
 };
@@ -821,6 +776,34 @@ MutableMatrix /* or null */ * MutableMat<T>::mult(const MutableMatrix *B) const
   LinAlg::mult(mat, B1->mat, result->mat);
 
   return result;
+}
+
+template <typename T>
+void MutableMat<T>::addMultipleTo(const MutableMatrix* A,
+                                  const MutableMatrix* B)
+{
+  // First: make sure that A, B have the right ring/matrix type
+  const MutableMat<T>* A1 = A->cast_to_MutableMat<T>();
+  const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
+  if (A1 == 0 or B1 == 0)
+    throw exc::engine_error("mutable matrix/ring type for (mutable) matrix multiplication required to be the same");
+  if (mat.numRows() != A1->n_rows() or mat.numColumns() != B1->n_cols())
+    throw exc::engine_error("expected matrix sizes to be compatible with matrix multiplication");
+  LinAlg::addMultipleTo(mat,A1->mat,B1->mat);
+}
+
+template <typename T>
+void MutableMat<T>::subtractMultipleTo(const MutableMatrix* A,
+                                       const MutableMatrix* B)
+{
+  // First: make sure that A, B have the right ring/matrix type
+  const MutableMat<T>* A1 = A->cast_to_MutableMat<T>();
+  const MutableMat<T>* B1 = B->cast_to_MutableMat<T>();
+  if (A1 == 0 or B1 == 0)
+    throw exc::engine_error("mutable matrix/ring type for (mutable) matrix multiplication required to be the same");
+  if (mat.numRows() != A1->n_rows() or mat.numColumns() != B1->n_cols())
+    throw exc::engine_error("expected matrix sizes to be compatible with matrix multiplication");
+  LinAlg::subtractMultipleTo(mat,A1->mat,B1->mat);
 }
 
 template <typename T>
