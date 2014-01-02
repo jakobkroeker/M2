@@ -1,12 +1,10 @@
 # svn://linalg.org/fflas-ffpack/
 # http://linalg.org/projects/fflas-ffpack
 
-# VERSION = 1.4.2.169
-# URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode/trunk
 VERSION = 2.61.440
+# URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode/trunk
 URL = http://www.math.illinois.edu/Macaulay2/Downloads/OtherSourceCode/trunk/
 
-#TARDIR = fflas-ffpack-$(VERSION)
 TARDIR = fflas-ffpack
 TARFILE = fflas_ffpack-$(VERSION).tar.gz
 PATCHFILE = @abs_srcdir@/patch-$(VERSION)
