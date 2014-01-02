@@ -1,0 +1,50 @@
+--- fflas-ffpack/utils/debug.h     2012-03-26 15:24:57.000000000 +0200
++++ fflas-ffpack/utils/debug.h 2013-11-16 18:12:31.883220767 +0100
+@@ -110,6 +110,8 @@ throw FFPACK::Failure (__func__, __FILE_
+ namespace FFPACK {
+ 
+ 
++        // anonymous namespace to prevent duplicate definition of Failure::_errorStream
++        namespace {
+ 	/*!  A precondtion failed.
+ 	 * @ingroup util
+ 	 * The \c throw mechanism is usually used here as in
+@@ -228,7 +230,7 @@ namespace FFPACK {
+ 	bool isOdd(double &a) {
+ 		return (bool)(int)fmod(a,2.);
+ 	}
+-
++    } // anonymous namespace to prevent duplicate definition of Failure::_errorStream
+ } // FFPACK
+ 
+ #endif // __FFLASFFPACK_util_debug_H
+--- fflas-ffpack/fflas-ffpack/ffpack/ffpack.h	2013-09-14 16:37:09.000000000 +0200
++++ fflas-ffpack/fflas-ffpack/ffpack/ffpack.h	2013-09-15 00:24:47.000000000 +0200
+@@ -1693,7 +1693,7 @@ else { // Left NullSpace
+ 	}
+ 
+ 	template <class Field, class Polynomial>
+-	std::list<Polynomial>&
++	static Polynomial &
+ 	CharPoly( const Field& F, Polynomial& charp, const size_t N,
+ 		  typename Field::Element * A, const size_t lda,
+ 		  const FFPACK_CHARPOLY_TAG CharpTag= FfpackArithProg)
+@@ -1707,6 +1707,7 @@ else { // Left NullSpace
+ 		charp.resize(N+1);
+ 
+ 		Polynomial P = *(it++);
++		charp = P;
+ 		while( it!=factor_list.end() ){
+ 			mulpoly (F,charp, P, *it);
+ 			P = charp;
+--- fflas-ffpack/macros/blasATLAS-check.m4 	2013-12-09 19:58:40.000000000 +0100
++++ fflas-ffpack/macros/blasATLAS-check.m4	2013-12-09 19:59:20.000000000 +0100
+@@ -36,7 +36,7 @@ AC_DEFUN([FF_CHECK_CBLAS],
+ 				the directory which contains the library.  ])
+ 			])
+ 
+-		BLAS_HOME_PATH="$with_cblas ${DEFAULT_CHECKING_PATH} /usr/lib/atlas /usr/lib64/atlas"
++		BLAS_HOME_PATH="$with_cblas ${DEFAULT_CHECKING_PATH} "
+ 		dnl  echo $BLAS_HOME_PATH
+ 
+ 		dnl Check for existence
