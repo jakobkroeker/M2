@@ -11,6 +11,8 @@ TARDIR = fflas-ffpack
 TARFILE = fflas_ffpack-$(VERSION).tar.gz
 PATCHFILE = @abs_srcdir@/patch-$(VERSION)
 LICENSEFILES = COPYING
+# configure will fail on scientific linux 6.4 due to a bug in the shipped autotools. 
+# Is fixable by replacing of "then" with "then: ;". 
 #PRECONFIGURE = ./autogen.sh -h; sed -i.bak "s/then/then\ :\ ;\ /g" configure
 PRECONFIGURE = ./autogen.sh -h; 
 # INSTALLCMD = $(MKDIR_P) $(LIBRARIESDIR)/include/fflas-ffpack && \
