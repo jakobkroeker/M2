@@ -117,6 +117,9 @@ TEST(ARingRRR, subtract)
       R.subtract(c,a,b);
       R.add(e,c,b); // should be a
       EXPECT_TRUE(almostEqual(R,98,a,e));
+      R.mult(e,a,b);
+      R.subtract_multiple(e,a,b);
+      EXPECT_TRUE(R.is_zero(e));
     }
   R.clear(e);
   R.clear(c);
@@ -208,7 +211,7 @@ TEST(ARingRRR, axioms)
   R.clear(a);
 }
 
-TEST(ARingRRR, power)
+TEST(ARingRRR, power_and_invert)
 {
   M2::ARingRRR R(100);
   ARingElementGenerator<M2::ARingRRR> gen(R);
@@ -246,6 +249,8 @@ TEST(ARingRRR, power)
   R.clear(b);
   R.clear(a);
 }
+
+// TODO: syzygy?
 
 // Local Variables:
 // compile-command: "make -C $M2BUILDDIR/Macaulay2/e/unit-tests check  "

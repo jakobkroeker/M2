@@ -1,414 +1,260 @@
-// Copyright 2005  Michael E. Stillman
+// Copyright 2005,2013  Michael E. Stillman
 
 #include "exceptions.hpp"
 #include "error.h"
 
-#include "dmat.hpp"
-#include "MatLinAlg.hpp"
+#include "mat-linalg.hpp"
 
 ////////////////////////////////////////////////////////////////////////////
 // dmat code that might have alternate implementations, depending of type //
 ////////////////////////////////////////////////////////////////////////////
 
 #ifdef HAVE_FFLAS_FFPACK
-size_t MatLinAlg< DMat<M2::ARingZZpFFPACK> >::rank(const Mat& mat)
+namespace MatrixOppies
 {
-    std::cout << "Calling MatLinAlg::rank" << std::endl;
+  size_t rank(const DMatZZpFFPACK& mat)
+  {
     /// @note 1. matrix data (N) is modified by FFPACK
-    /// @note 2. FFPACK expects row-wise stored matrices while dmat stores them column-wise => switch n_rows and n_cols -parameters!
-    Mat N(mat); // copy of matrix mat.
-    size_t result = FFPACK::Rank(mat.ring().field(), mat.numColumns(), mat.numRows(), N.array(), mat.numRows());
+    DMatZZpFFPACK N(mat); // copy of matrix mat.
+    size_t result = FFPACK::Rank(mat.ring().field(), 
+                                 mat.numRows(), 
+                                 mat.numColumns(), 
+                                 N.array(), 
+                                 mat.numColumns());
     return result;
-}
-
-void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::determinant(const Mat& mat, ElementType& result_det)
-{
-    std::cout << "Calling MatLinAlg::determinant" << std::endl;
+  }
+  
+  void determinant(const DMatZZpFFPACK& mat, 
+                   ZZpFFPACK::ElementType& result_det)
+  {
+    std::cout << "Calling FFPACK::Det" << std::endl;
     /// @note 1. matrix data (N) is modified by FFPACK
-    /// @note 2. FFPACK expects row-wise stored matrices while dmat stores them column-wise => switch n_rows and n_cols -parameters!
-    Mat N(mat);
-    result_det = FFPACK::Det(mat.ring().field(), mat.numColumns(), mat.numRows(),  N.array(),  mat.numRows());
-}
-
-bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::inverse(const Mat& mat, Mat& result_inv)
-{
+    DMatZZpFFPACK N(mat);
+    result_det = FFPACK::Det(mat.ring().field(), 
+                             mat.numRows(), 
+                             mat.numColumns(),  
+                             N.array(),  
+                             mat.numColumns());
+  }
+  
+  bool inverse(const DMatZZpFFPACK& mat, 
+               DMatZZpFFPACK& result_inv)
+  {
     M2_ASSERT(mat.numRows() == mat.numColumns());
-    Mat N(mat);
+    M2_ASSERT(result_inv.numRows() == mat.numRows());
+    M2_ASSERT(result_inv.numColumns() == mat.numRows());
+
+    DMatZZpFFPACK N(mat);
     size_t n = mat.numRows();
     int nullspacedim;
-    FFPACK::Invert2(mat.ring().field(), n, N.array(), n, result_inv.array(), n, nullspacedim);
+    FFPACK::Invert2(mat.ring().field(), 
+                    n, 
+                    N.array(), 
+                    n, 
+                    result_inv.array(), 
+                    n, 
+                    nullspacedim);
     return (nullspacedim == 0);
-}
+  }
+  
+  size_t nullSpace(const DMatZZpFFPACK& mat, 
+                   bool right_side, 
+                   DMatZZpFFPACK& nullspace)
+  {
+    DMatZZpFFPACK N(mat); // copy of mat
+    size_t nr = mat.numRows();
+    size_t nc = mat.numColumns();
+    
+    DMatZZpFFPACK::ElementType *nullspaceFFPACK = 0;
+    
+    size_t nullspace_dim;
+    size_t nullspace_leading_dim;
+    
+    FFPACK::NullSpaceBasis(mat.ring().field(),
+                           (right_side ? FFLAS::FflasRight : FFLAS::FflasLeft),
+                           nr, 
+                           nc, 
+                           N.array(), 
+                           nc, 
+                           nullspaceFFPACK, 
+                           nullspace_leading_dim, 
+                           nullspace_dim);
+    
+    std::cerr << "leading dim = " << nullspace_leading_dim << " and dim = " << nullspace_dim << std::endl;
+    if (right_side && nullspace_dim != nullspace_leading_dim)
+      {
+        std::cerr << "error: this should not happen!" << std::endl;
+      }
+    else if (!right_side && nullspace_leading_dim != nc)
+      {
+        std::cerr << "error: this should not happen either!" << std::endl;
+      }
+    
+    if (right_side)
+      nullspace.resize(nc,nullspace_dim);
+    else
+      nullspace.resize(nullspace_dim,nr);
+    
+    std::swap(nullspace.array(), nullspaceFFPACK);
+    
+    delete [] nullspaceFFPACK;
+    return nullspace_dim;
+  }
 
-void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::mult(const Mat& A, const Mat& B, Mat& C)
-{
-    // This one is a bit harder, as we need to be careful about rows/columns, and the ffpack routine
-    // is so general.
-    // We assume that result_product has been just created
-    std::cout << "entering MatLinAlg< DMat<M2::ARingZZpFFPACK> > mult" << std::endl; 
+  bool solveLinear(const DMatZZpFFPACK& A, 
+                   const DMatZZpFFPACK& B, 
+                   bool right_side, 
+                   DMatZZpFFPACK& X, 
+                   bool declare_A_is_invertible) // this parameter is unused
+  {
+    std::cerr << "inside FFpackSolveLinear" << std::endl;
+    
+    size_t a_rows = A.numRows();
+    size_t a_cols = A.numColumns();
+    
+    size_t b_rows = B.numRows();
+    size_t b_cols = B.numColumns();
+    
+    DMatZZpFFPACK copyA(A);
+    DMatZZpFFPACK copyB(B);
+    
+    // preallocate the space for the solutions:
+    size_t x_rows = (right_side ? a_cols : b_rows);
+    size_t x_cols = (right_side ? b_cols : a_rows);
+    
+    X.resize(x_rows, x_cols); // sets it to 0 too.
+    
+    int info = 0; // >0 if the system is inconsistent, ==0 means success
 
+    FFPACK::fgesv(A.ring().field(),
+                  (right_side ? FFLAS::FflasLeft : FFLAS::FflasRight),
+                  a_rows, 
+                  a_cols, 
+                  (right_side ? b_cols : b_rows),
+                  copyA.array(),
+                  a_cols, // leading dim of A
+                  X.array(), 
+                  x_cols,
+                  copyB.array(), 
+                  b_cols,
+                  &info);
+
+    if (info > 0)
+      {
+        // the system is inconsistent
+        ERROR("the system is inconsistent");
+        return false;
+      }
+    
+    return true;
+  } 
+
+  bool solveLinear(const DMatZZpFFPACK& A, 
+                   const DMatZZpFFPACK& B, 
+                   DMatZZpFFPACK& X)
+  {
+    return solveLinear(A, B, true, X, false);
+  }
+  
+  M2_arrayintOrNull rankProfile(const DMatZZpFFPACK& mat, 
+                                bool row_profile)
+  
+  {
+    DMatZZpFFPACK N(mat);
+    
+    size_t * prof; // this is where the result will be placed
+    size_t rk;
+    if (row_profile)
+      rk = FFPACK::RowRankProfile(mat.ring().field(),
+                                  mat.numRows(),
+                                  mat.numColumns(),
+                                  N.array(),
+                                  mat.numColumns(),
+                                  prof);
+    else
+      rk = FFPACK::ColumnRankProfile(mat.ring().field(),
+                                     mat.numRows(),
+                                     mat.numColumns(),
+                                     N.array(),
+                                     mat.numColumns(),
+                                     prof);
+    
+    M2_arrayint profile = M2_makearrayint(static_cast<int>(rk));
+    for (size_t i=0; i<rk; i++)
+      profile->array[i] = static_cast<int>(prof[i]);
+    
+    delete [] prof;
+    return profile;
+  }
+  
+  void addMultipleTo(DMatZZpFFPACK& C,
+                     const DMatZZpFFPACK::ElementType& a,
+                     const DMatZZpFFPACK& A, 
+                     const DMatZZpFFPACK& B)
+  {
+    // Compute C := C + a*A*B
+    // Both DMat, and FFPACK store dense matrices in row major order.
+    // Note that the leading dimension in gemm arguments is #columns, 
+    // as the matrix is in row-major order
+    
     FFLAS::FFLAS_TRANSPOSE tA = FFLAS::FflasNoTrans;
     FFLAS::FFLAS_TRANSPOSE tB = FFLAS::FflasNoTrans;
 
-    size_t m = B.numColumns();
-    size_t n = A.numRows();
-        
+    size_t m = A.numRows();
     size_t k = A.numColumns();
-    //    size_t k2 = B.numRows();
+    M2_ASSERT(A.numColumns() == B.numRows());
+    size_t n = B.numColumns();
+    
+    M2_ASSERT(C.numRows() == m);
+    M2_ASSERT(C.numColumns() == n);
 
-    ElementType a;
-    C.ring().init(a);
-    C.ring().set_from_int(a, 1);
-
-    assert( C.numRows()==A.numRows() );
-    assert( C.numColumns()==B.numColumns() );
-    std::cout << "ok so far. calling fgemm" << std::endl;
+    DMatZZpFFPACK::ElementType b;
+    C.ring().init(b);
+    C.ring().set_from_int(b, 1);
     FFLAS::fgemm( C.ring().field(),
                   tB, tA,
                   m,n,k,
                   a,
-                  B.array(),
-                  B.numRows(),
                   A.array(),
-                  A.numRows(),
-                  a,
-                  C.array(),
-                  C.numRows()
-                  );
-}
-
-size_t MatLinAlg< DMat<M2::ARingZZpFFPACK> >::nullSpace(const Mat &mat, 
-                                                       bool right_side,
-                                                       Mat &nullspace)
-
-{
-  right_side = !right_side; // because FFPACK stores by rows, not by columns.
-
-  Mat N(mat); // copy of mat
-  size_t nr = mat.numRows();
-  size_t nc = mat.numColumns();
-  
-  ElementType *nullspaceFFPACK = 0;
-  
-  size_t nullspace_dim;
-  size_t nullspace_leading_dim;
-  
-  FFPACK::NullSpaceBasis(mat.ring().field(),
-                         (right_side ? FFLAS::FflasRight : FFLAS::FflasLeft),
-                         nc, nr, N.array(), nr, nullspaceFFPACK, nullspace_leading_dim, nullspace_dim);
-  
-  std::cerr << "leading dim = " << nullspace_leading_dim << " and dim = " << nullspace_dim << std::endl;
-  if (right_side && nullspace_dim != nullspace_leading_dim)
-    {
-      std::cerr << "error: this should not happen!" << std::endl;
-    }
-  else if (!right_side && nullspace_leading_dim != nc)
-    {
-      std::cerr << "error: this should not happen either!" << std::endl;
-    }
-  
-  if (right_side)
-    nullspace.resize(nullspace_dim,nr);
-  else
-    nullspace.resize(nc,nullspace_dim);
-
-  std::swap(nullspace.array(), nullspaceFFPACK);
-  //  mat.copy_elems(nullspace.n_rows() * nullspace.n_cols(), nullspace.get_array(), 1, nullspaceFFPACK, 1); 
-
-  delete [] nullspaceFFPACK;
-  return nullspace_dim;
-}
-
-M2_arrayintOrNull MatLinAlg< DMat<M2::ARingZZpFFPACK> >::rankProfile(const Mat& mat,
-                                                                     bool row_profile)
-{
-  // Note that FFPack stores matrices by row, not column, the opposite of what we do.
-  // So row_profile true means use ffpack column rank profile!
-  row_profile = not row_profile; // TODO: once matrices are stored row-major, this should be removed.
-  Mat N(mat);
-  
-  size_t * prof; // this is where the result will be placed
-  size_t rk;
-  if (row_profile)
-    rk = FFPACK::RowRankProfile(mat.ring().field(),
-                                mat.numColumns(),mat.numRows(),
-                                N.array(),mat.numRows(),
-                                prof);
-  else
-    rk = FFPACK::ColumnRankProfile(mat.ring().field(),
-                                   mat.numColumns(),mat.numRows(),
-                                   N.array(),mat.numRows(),
-                                   prof);
-  
-  M2_arrayint profile = M2_makearrayint(static_cast<int>(rk));
-  for (size_t i=0; i<rk; i++)
-    profile->array[i] = static_cast<int>(prof[i]);
-  
-  delete [] prof;
-  return profile;
-}
-
-bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, 
-                                                        const Mat& B, 
-                                                        bool right_side, 
-                                                        Mat& X, 
-                                                        bool declare_A_is_invertible)
-{
-  std::cerr << "inside FFpackSolveLinear" << std::endl;
-
-  size_t a_rows = A.numRows();
-  size_t a_cols = A.numColumns();
-  
-  size_t b_rows = B.numRows();
-  size_t b_cols = B.numColumns();
-
-  Mat copyA(A);
-  Mat copyB(B);
-
-  // preallocate the space for the solutions:
-  size_t x_rows = (right_side ? a_cols : b_rows);
-  size_t x_cols = (right_side ? b_cols : a_rows);
-
-  X.resize(x_rows, x_cols); // sets it to 0 too.
-  
-  int info; // >0 if the system is inconsistent, ==0 means success
-  
-  FFPACK::fgesv(A.ring().field(),
-                (!right_side ? FFLAS::FflasLeft : FFLAS::FflasRight),
-                a_cols, a_rows, 
-                (!right_side ? b_cols : b_rows),
-                copyA.array(),
-                a_rows, // leading dim of A
-                X.array(), x_rows,
-                copyB.array(), b_rows,
-                &info);
-  
-  if (info > 0)
-    {
-      // the system is inconsistent
-      ERROR("the system is inconsistent");
-      return false;
-    }
-  
-  return true;
-} 
-
-bool MatLinAlg< DMat<M2::ARingZZpFFPACK> >::solveLinear(const Mat& A, const Mat& B, Mat& X)
-{
-  return solveLinear(A, B, true, X, false);
-}
-
- static void ARingZZpFFPACKAddMultipleTo( DMat<M2::ARingZZpFFPACK> &C,
-                                                      const DMat<M2::ARingZZpFFPACK> &A,
-                                                      const DMat<M2::ARingZZpFFPACK> &B,
-                                                      bool transposeA,
-                                                      bool transposeB,
-                                                      const typename DMat<M2::ARingZZpFFPACK>::ElementType &a,
-                                                      const typename DMat<M2::ARingZZpFFPACK>::ElementType &b)
-    /* A,B,C should be mutable matrices over a finite prime field, and a,b
-       elements of this field.
-       C = b*C + a * op(A)*op(B),
-       where op(A) = A or transpose(A), depending on transposeA
-       where op(B) = B or transpose(B), depending on transposeB
-       connected to rawFFPackAddMultipleTo, MES
-    */
- {
-    std::cout << "entering ARingZZpFFPACKAddMultipleTo" << std::endl; 
- 
-
-   typedef DMat<M2::ARingZZpFFPACK> Mat;
-    FFLAS::FFLAS_TRANSPOSE tA = (transposeA ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
-    FFLAS::FFLAS_TRANSPOSE tB = (transposeB ? FFLAS::FflasTrans : FFLAS::FflasNoTrans);
-  
-    // determine m,n,k
-    size_t m = (transposeA ? A.numColumns() : A.numRows() );
-    size_t n = (transposeB ? B.numRows() : B.numColumns() );
-    size_t k = (transposeA ? A.numRows() : A.numColumns() );
-    size_t k2 = (transposeB ? B.numColumns() : B.numRows());
-    if (k != k2)
-      {
-        throw exc::engine_error("matrices have wrong shape to be multiplied");
-        return ;
-      }
-  
-    Mat copyA(A);
-    Mat copyB(B);
-
-    std::cout << "copy succeeded"<< std::endl; 
-
-    FFLAS::fgemm( A.ring().field(),
-                  tA, tB,
-                  m,n,k,
-                  a,
-                  copyA.array(),
                   A.numColumns(),
-                  copyB.array(),
+                  B.array(),
                   B.numColumns(),
                   b,
                   C.array(),
                   C.numColumns()
                   );
-    return  ;
+  }
+
+  void addMultipleTo(DMatZZpFFPACK& C, 
+                     const DMatZZpFFPACK& A, 
+                     const DMatZZpFFPACK& B)
+  {
+    DMatZZpFFPACK::ElementType one;
+    A.ring().set_from_int( one,1 );
+
+    addMultipleTo(C,one,A,B);
   }
   
-     void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::addMultipleTo( Mat &C, const Mat & A,  const Mat & B       )
-   {
-        bool transposeA;
-        
-                                                      bool transposeB;
-        ElementType one;
-        
-        A.ring().set_from_int( one,1 );
-  
-        ARingZZpFFPACKAddMultipleTo( C, A, B,  
-                       transposeA=false,
-                       transposeB=false,  
-                       one,  
-                       one
-                     );
-        return;
-}
+  void subtractMultipleTo(DMatZZpFFPACK& C, 
+                          const DMatZZpFFPACK& A, 
+                          const DMatZZpFFPACK& B)
+  {
+    DMatZZpFFPACK::ElementType minus_one;
+    A.ring().set_from_int( minus_one,-1 );
+    addMultipleTo(C,minus_one,A,B);
+  }
 
-void MatLinAlg< DMat<M2::ARingZZpFFPACK> >::subtractMultipleTo(Mat &C,
-                                                      const Mat &A,
-                                                      const Mat &B       )
-   {
-        bool transposeA;
-        bool transposeB;
-                                                      
-     
-        ElementType a,b;
-        
-        A.ring().set_from_int( b,1 );
-        A.ring().invert( a, b );
-      
-        
-        ARingZZpFFPACKAddMultipleTo( C, A, B,  
-                       transposeA=false,
-                       transposeB=false,  
-                       a,  
-                       b
-                     );
-       return;
-}
-                                                     
+  void mult(const DMatZZpFFPACK& A, 
+            const DMatZZpFFPACK& B, 
+            DMatZZpFFPACK& C)
+  {
+    // We assume that C is set to the correct size, and is the zero matrix here.
+    addMultipleTo(C,A,B);
+  }
+
+};                                                     
 
 #endif // HAVE_FFLAS_FFPACK
-
-//template<> 
-//size_t DMat<M2::ARingRRR>::rank() const
-//{
-//  return LUDecompositionRRR::rankRRR(*this);
-//}
-
-//template<>
-//void DMat<M2::ARingRRR>::determinant(ElementType &result) const
-//{
-//  LUDecompositionRRR::determinantRRR(*this, result);
-//}
-
-
-#include "mutablemat.hpp"
-
-template<typename MatT> 
-inline MatT * MutableMatrix::coerce()
-{
-  MutableMat<MatT> *P = cast_to_MutableMat<MatT>();
-  if (P == 0) return 0;
-  return P->get_Mat();
-}
-
-template<typename MatT> 
-inline const MatT * MutableMatrix::coerce() const
-{
-  const MutableMat<MatT> *P = cast_to_MutableMat<MatT>();
-  if (P == 0) return 0;
-  return P->get_Mat();
-}
-
-M2_arrayint stdvector_to_M2_arrayint(std::vector<size_t> &v)
-{
-  M2_arrayint result = M2_makearrayint(static_cast<int>(v.size()));
-  for (size_t i = 0; i < v.size(); i++)
-    result->array[i] = static_cast<int>(v[i]);
-  return result;
-}
-
-engine_RawArrayIntPairOrNull rawLQUPFactorizationInPlace(MutableMatrix *A, M2_bool transpose)
-{
-#ifdef HAVE_FFLAS_FFPACK
-  // Suppose A is m x n
-  // P is n element permutation on columns
-  // Qt is m element permutation on rows (inverse permutation)
-  DMat<M2::ARingZZpFFPACK> *mat = A->coerce< DMat<M2::ARingZZpFFPACK> >();
-  if (mat == 0) 
-    {
-      throw exc::engine_error("LUDivine not defined for this ring");
-      //      ERROR("LUDivine not defined for this ring");
-      //      return 0;
-    }
-  size_t nelems = mat->numColumns();
-  if (mat->numRows() > mat->numColumns()) nelems = mat->numRows();
-
-  std::vector<size_t> P(nelems, -1);
-  std::vector<size_t> Qt(nelems, -1);
-
-  // ignore return value (rank) of:
-  LUdivine(mat->ring().field(),
-                       FFLAS::FflasNonUnit,
-                       (!transpose ? FFLAS::FflasTrans : FFLAS::FflasNoTrans),
-                       mat->numColumns(),
-                       mat->numRows(),
-                       mat->array(),
-                       mat->numRows(),
-                       &P[0], 
-                       &Qt[0]);
-
-  engine_RawArrayIntPairOrNull result = new engine_RawArrayIntPair_struct;
-  result->a = stdvector_to_M2_arrayint(Qt);
-  result->b = stdvector_to_M2_arrayint(P);
-  return result;
-#endif
-  return 0;
-}
-
-
-#include "dmat-LU.hpp"
-#include "lapack.hpp"
-#include "aring-zz-flint.hpp"
-#include "aring-qq.hpp"
-#include "aring-zzp-flint.hpp"
-#include "aring-zzp.hpp"
-#include "aring-tower.hpp"
-#include "aring-m2-gf.hpp"
-#include "aring-gf-givaro.hpp"
-#include "aring-zz-gmp.hpp"
-#include "coeffrings.hpp"
-
-template class DMat<M2::ARingQQ>;
-template class DMat<M2::ARingZZGMP>;
-template class DMat<M2::ARingZZp>;
-template class DMat<M2::ARingTower>;
-
-template class DMat<CoefficientRingRRR>;
-template class DMat<CoefficientRingCCC>;
-template class DMat<CoefficientRingR>;
-
-template class DMat<M2::ARingGFM2>;
-template class DMat<M2::ARingZZpFFPACK>;
-
-#ifdef HAVE_FLINT
-template class DMat<M2::ARingZZpFlint>;
-template class DMat<M2::ARingZZ>;
-template class DMat<M2::ARingQQFlint>;
-#endif
-
-template class DMat<M2::ARingGFGivaro>;
-template class DMat<M2::ARingRRR>;
-
-
-
-
 
 // Local Variables:
 // compile-command: "make -C $M2BUILDDIR/Macaulay2/e "

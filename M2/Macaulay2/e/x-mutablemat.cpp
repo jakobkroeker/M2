@@ -40,6 +40,7 @@ MutableMatrix /* or null */ * IM2_MutableMatrix_make(const Ring *R,
   M2_ASSERT(ncols >= 0);
   size_t nr = static_cast<size_t>(nrows);
   size_t nc = static_cast<size_t>(ncols);
+  //  return R->makeMutableMatrix(nr,nc,is_dense);
   return MutableMatrix::zero_matrix(R,nr,nc,is_dense);
 }
 
@@ -819,24 +820,6 @@ void rawLUSplit(const MutableMatrix *LU,
 ////////////////////////////////////////////////
 
 
-
-
-M2_bool rawNullspaceU(MutableMatrix *U,
-                      MutableMatrix *x)
-  /* U should be a matrix in LU 'U' format.
-     x is set to the matrix whose columns form a basis of Ux=0,
-     which is the same as Ax=0. if A = PLU is the LU-decomp of A.
-  */
-{
-  const Ring *R = U->get_ring();
-  if (R != x->get_ring())
-    {
-      ERROR("expected matrices with same base ring");
-      return false;
-    }
-  return U->nullspaceU(x);
-}
-
 M2_bool rawSolve(MutableMatrix *A,
                  MutableMatrix *b,
                  MutableMatrix *x)
@@ -847,26 +830,37 @@ M2_bool rawSolve(MutableMatrix *A,
   /* Otherwise: give error:
      OR: make mutable matrices of the correct size, call the correct routine
      and afterwords, copy to x. */
-
-  const Ring *R = A->get_ring();
-  if (R != b->get_ring() || R != x->get_ring())
-    {
-      ERROR("expected matrices with same base ring");
-      return false;
-    }
-  if (A->n_rows() != b->n_rows())
-    {
-      ERROR("expected matrices with the same number of rows");
-      return false;
-    }
-  return A->solve(b,x);
+  try {
+    const Ring *R = A->get_ring();
+    if (R != b->get_ring() || R != x->get_ring())
+      {
+        ERROR("expected matrices with same base ring");
+        return false;
+      }
+    if (A->n_rows() != b->n_rows())
+      {
+        ERROR("expected matrices with the same number of rows");
+        return false;
+      }
+    return A->solve(b,x);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return false;
+  }
 }
 
 M2_bool rawEigenvalues(MutableMatrix *A,
                        MutableMatrix *eigenvalues,
                        M2_bool is_symm_or_hermitian)
 {
-  return A->eigenvalues(eigenvalues,is_symm_or_hermitian);
+  try {
+    return A->eigenvalues(eigenvalues,is_symm_or_hermitian);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return false;
+  }
 }
 
 M2_bool rawEigenvectors(MutableMatrix *A,
@@ -874,7 +868,13 @@ M2_bool rawEigenvectors(MutableMatrix *A,
                         MutableMatrix *eigenvectors,
                         M2_bool is_symm_or_hermitian)
 {
-  return A->eigenvectors(eigenvalues, eigenvectors, is_symm_or_hermitian);
+  try {
+    return A->eigenvectors(eigenvalues, eigenvectors, is_symm_or_hermitian);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return false;
+  }
 }
 
 M2_bool rawSVD(MutableMatrix *A,
@@ -883,7 +883,13 @@ M2_bool rawSVD(MutableMatrix *A,
                MutableMatrix *VT,
                M2_bool use_divide_and_conquer)
 {
-  return A->SVD(Sigma,U,VT,use_divide_and_conquer);
+  try {
+    return A->SVD(Sigma,U,VT,use_divide_and_conquer);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return false;
+  }
 }
 
 M2_bool rawLeastSquares(MutableMatrix *A,
@@ -893,18 +899,24 @@ M2_bool rawLeastSquares(MutableMatrix *A,
 /* Case 1: A is a dense matrix over RR.  Then so are b,x.
    Case 2: A is a dense matrix over CC.  Then so are b,x. */
 {
-  const Ring *R = A->get_ring();
-  if (R != b->get_ring() || R != x->get_ring())
-    {
-      ERROR("expected matrices with same base ring");
-      return false;
-    }
-  if (A->n_rows() != b->n_rows())
-    {
-      ERROR("expected matrices with the same number of rows");
-      return false;
-    }
-  return A->least_squares(b,x,assume_full_rank);
+  try {
+    const Ring *R = A->get_ring();
+    if (R != b->get_ring() || R != x->get_ring())
+      {
+        ERROR("expected matrices with same base ring");
+        return false;
+      }
+    if (A->n_rows() != b->n_rows())
+      {
+        ERROR("expected matrices with the same number of rows");
+        return false;
+      }
+    return A->least_squares(b,x,assume_full_rank);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return false;
+  }
 }
 
 ////////////////////////////////////////
@@ -938,8 +950,8 @@ MutableMatrix /* or null */ *rawMutableMatrixClean(gmp_RR epsilon, MutableMatrix
       ERROR("expected ring over an RR or CC");
       return 0;
     }
-  //return M->clean(epsilon);
-  return NULL;
+  M->clean(epsilon);
+  return M;
 }
 
 static gmp_RRorNull get_norm_start(gmp_RR p, const Ring *R)
@@ -976,6 +988,7 @@ gmp_RRorNull rawRingElementNorm(gmp_RR p, const RingElement *f)
 
 gmp_RRorNull rawMutableMatrixNorm(gmp_RR p, const MutableMatrix *M)
 {
+  return M->norm();
 #if 0
   gmp_RR nm = get_norm_start(p, M->get_ring());
   iterator *i = M->begin();
@@ -998,23 +1011,6 @@ gmp_RRorNull rawMutableMatrixNorm(gmp_RR p, const MutableMatrix *M)
 //////////////////////////////////
 // Fast linear algebra routines //
 //////////////////////////////////
-
-// how many of each need to be written:
-// DONE FastLinearAlgebra
-// DONE interface.dd, actually done.  But should rename these functions
-//   rawFFPackRank
-//   rawFFPackDeterminant
-//   rawFFPackInvert
-//   rawFFPackRankProfile
-//   rawFFPackNullSpace
-//   rawFFPackSolve
-//   rawFFPackAddMultipleTo
-// DONE engine.h
-// DONE x-mutablemat.cpp
-// DONE MutableMatrix (not addMultipleTo)
-// MutableMat<X> -- has actual code to call the routines in DMat, SMat
-// DMat<X>  -- one for each X, and one that is the "default" (default: DONE)
-// SMat<X> -- one for each X and one that is the "default" (default: DONE)
 
 long rawLinAlgRank(MutableMatrix* M)
 {
@@ -1075,16 +1071,28 @@ MutableMatrix* rawLinAlgSolve(const MutableMatrix* A,
                          const MutableMatrix* B,
                          M2_bool right_side)
 {
-  std::cerr << "calling rawLinAlgSolve" << std::endl;
-  //TODO: return type doesn't distinguish between error, and no solution.
-  std::pair<bool, MutableMatrix*> result = A->solveLinear(B, right_side);
-  if (result.first)
-    return result.second;
-  ERROR("got a zero -- why??");
-  return 0;
-}
+  try {
+    std::cerr << "calling rawLinAlgSolve" << std::endl;
+    //TODO: return type doesn't distinguish between error, and no solution.
+    std::pair<bool, MutableMatrix*> result = A->solveLinear(B, right_side);
+    if (result.first)
+      return result.second;
+    else
+      {
+        // system is inconsistent
+        ERROR("system is inconsistent");
+        return NULL;
+      }
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return NULL;
+  }
 
-MutableMatrix* /* or null */ rawLinAlgAddMultipleTo(MutableMatrix* C,
+/*
+MutableMatrix* 
+// or null 
+rawLinAlgAddMultipleTo(MutableMatrix* C,
                                                     const MutableMatrix* A,
                                                     const MutableMatrix* B,
                                                     M2_bool transposeA,
@@ -1096,6 +1104,8 @@ MutableMatrix* /* or null */ rawLinAlgAddMultipleTo(MutableMatrix* C,
    // C->addMultipleTo(A,B,transposeA,transposeB,a,b);
     return C;
 }
+// */
+
 
 M2_bool rawLinAlgAddMult(MutableMatrix* C,
                       const MutableMatrix* A,

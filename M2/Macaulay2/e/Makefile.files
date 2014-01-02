@@ -9,20 +9,24 @@ INTERFACE2 = \
 	newdelete \
 
 INTERFACE = \
+	GF \
+	ZZ \
+	QQ \
+	ZZp \
 	reader \
 	matrix-stream \
 	cra \
-	DenseMatrixDef \
 	aring-zz-gmp \
 	aring-qq-gmp \
 	aring-zz-flint \
 	aring-qq-flint \
 	aring-zzp-flint \
+	aring-RR \
+	aring-CC \
 	aring-RRR \
+	aring-CCC \
 	aring-tower \
 	aring-m2-gf \
-	aring-promoter \
-	aring-glue \
 	aring-zzp \
 	aring-gf-givaro \
 	aring-zzp-ffpack \
@@ -42,7 +46,6 @@ INTERFACE = \
 	imonorder \
 	sagbi \
 	monideal-minprimes \
-	dmat-LU \
 	lapack \
 	LLL \
 	fractionfreeLU \
@@ -50,7 +53,6 @@ INTERFACE = \
     fplll-interface \
 	mat \
 	dmat \
-	smat \
 	coeffrings \
 	Eschreyer \
 	gbweight \
@@ -76,11 +78,6 @@ INTERFACE = \
 	montable \
 	montableZZ \
 	schorder \
-	GF \
-	ZZ \
-	QQ \
-	RRR \
-	CCC \
 	assprime \
 	buffer \
 	comb \
@@ -118,8 +115,11 @@ INTERFACE = \
 	spair \
 	text-io \
 	varpower \
-	weylalg \
-	ZZp
+	weylalg
+
+#	RRR \
+#	CCC \
+#
 
 COMMANDS2 = \
 	x-monideal \

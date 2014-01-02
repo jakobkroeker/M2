@@ -29,7 +29,10 @@
 
 #include "aring.hpp"
 #include "aring-glue.hpp"
+#include "aring-RR.hpp"
+#include "aring-CC.hpp"
 #include "aring-RRR.hpp"
+#include "aring-CCC.hpp"
 unsigned long IM2_Ring_hash(const Ring *R)
 {
   return R->get_hash_value();
@@ -84,16 +87,16 @@ const Ring /* or null */ *rawGaloisField(const RingElement *f)
 
 const Ring /* or null */ *IM2_Ring_RRR(unsigned long prec)
 {
-#ifdef use_new_RRR
+  if (prec <= 53)
+    return M2::ConcreteRing<M2::ARingRR>::create(new M2::ARingRR());
   return M2::ConcreteRing<M2::ARingRRR>::create(new M2::ARingRRR(prec));
-#else
-  return RRR::create(prec);
-#endif
 }
 
 const Ring /* or null */ *IM2_Ring_CCC(unsigned long prec)
 {
-  return CCC::create(prec);
+  if (prec <= 53)
+    return M2::ConcreteRing<M2::ARingCC>::create(new M2::ARingCC());
+  return M2::ConcreteRing<M2::ARingCCC>::create(new M2::ARingCCC(prec));
 }
 
 const Ring *IM2_Ring_trivial_polyring()
@@ -536,6 +539,7 @@ const RingElement *IM2_RingElement_from_BigComplex(const Ring *R, gmp_CC z)
   ring_elem f;
   if (R->from_BigComplex(z,f))
     return RingElement::make_raw(R, f);
+  ERROR("cannot create element of this ring from an element of CC");
   return 0;
 }
 
@@ -544,6 +548,7 @@ const RingElement *IM2_RingElement_from_BigReal(const Ring *R, gmp_RR z)
   ring_elem f;
   if (R->from_BigReal(z,f))
     return RingElement::make_raw(R, f);
+  ERROR("cannot create element of this ring from an element of RR");
   return 0;
 }
 
@@ -579,6 +584,7 @@ gmp_QQorNull IM2_RingElement_to_rational(const RingElement *a)
   return static_cast<gmp_QQ>(f);
 }
 
+#if 0
 gmp_RRorNull IM2_RingElement_to_BigReal(const RingElement *a)
 {
   if (!a->get_ring()->is_RRR())
@@ -594,16 +600,67 @@ gmp_RRorNull IM2_RingElement_to_BigReal(const RingElement *a)
   void *f = a->get_value().poly_val;
   return static_cast<gmp_RR>(f);
 }
+#endif
+
+gmp_RRorNull IM2_RingElement_to_BigReal(const RingElement *a)
+{
+  const Ring* R = a->get_ring();
+  gmp_RR result;
+  void* b;
+  double* c;
+  const M2::ConcreteRing<M2::ARingRRR> *R1;
+
+  switch (R->ringID()) 
+    {
+    case M2::ring_RR:
+      result = getmemstructtype(gmp_RR);
+      mpfr_init2(result, 53);
+      b = static_cast<void*>(a->get_value().poly_val);
+      c = static_cast<double*>(b);
+      mpfr_set_d(result, *c, GMP_RNDN);
+      return result;
+    case M2::ring_RRR:
+      R1 = dynamic_cast< const M2::ConcreteRing<M2::ARingRRR> * >(a->get_ring());
+      result = getmemstructtype(gmp_RR);
+      mpfr_init2(result, R1->get_precision());
+      b = a->get_value().poly_val;
+      mpfr_set(result, static_cast<gmp_RR>(b), GMP_RNDN);
+      return result;
+    default:
+      if (!a->get_ring()->is_RRR())
+        {
+          ERROR("expected an element of RRR");
+          return 0;
+        }
+      return a->get_value().mpfr_val;
+    }
+}
 
 gmp_CCorNull IM2_RingElement_to_BigComplex(const RingElement *a)
 {
-  if (!a->get_ring()->is_CCC())
+  const Ring* R = a->get_ring();
+  auto RCCC = dynamic_cast<const M2::ConcreteRing<M2::ARingCCC>*>(R);
+  if (RCCC != 0)
     {
-      ERROR("expected an element of CCC");
-      return 0;
+      M2::ARingCCC::ElementType b;
+      RCCC->ring().init(b);
+      RCCC->ring().from_ring_elem(b, a->get_value());
+      gmp_CC result = RCCC->ring().toBigComplex(b);
+      RCCC->ring().clear(b);
+      return result;
     }
-  void *f = a->get_value().poly_val;
-  return static_cast<gmp_CC>(f);
+  auto RCC = dynamic_cast<const M2::ConcreteRing<M2::ARingCC>*>(R);
+  if (RCC != 0)
+    {
+      M2::ARingCC::ElementType b;
+      RCC->ring().init(b);
+      RCC->ring().from_ring_elem(b, a->get_value());
+      gmp_CC result = RCC->ring().toBigComplex(b);
+      RCC->ring().clear(b);
+      return result;
+    }
+  ERROR("expected an element of CCC");
+  return 0;
 }
 
 int rawDiscreteLog(const RingElement *h)

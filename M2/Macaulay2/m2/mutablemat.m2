@@ -175,7 +175,7 @@ LUdecomposition Matrix := (A) -> (
 solve = method(Options => { ClosestFit => false, MaximalRank => false, Precision=>0 })
 solve(MutableMatrix,MutableMatrix) := opts -> (A,b) -> (
      R := ring A;
-     if hasEngineLinearAlgebra R then (
+     if hasEngineLinearAlgebra R and not opts.ClosestFit then (
          return map(R,rawLinAlgSolve(raw A, raw b, true));
          );
      if (opts#Precision !=0) then (
@@ -239,10 +239,7 @@ SVD Matrix := o -> A -> (
 
 rank MutableMatrix := (M) -> rawLinAlgRank raw M
 
-determinant MutableMatrix := opts -> (M) -> (
-     R := ring M;
-     new R from rawLinAlgDeterminant raw M
-     )
+determinant MutableMatrix := opts -> (M) -> promote(rawLinAlgDeterminant raw M, ring M)
 
 inverse MutableMatrix := (A) -> (
      R := ring A;
@@ -253,7 +250,7 @@ inverse MutableMatrix := (A) -> (
 nullSpace = method()
 nullSpace(MutableMatrix) := (M) -> (
      R := ring M;
-     map(R, rawLinAlgNullSpace raw M)
+     map(R, rawLinAlgNullSpace(raw M, true))
      )
 
 MutableMatrix ^ ZZ := (A, r) -> (
@@ -267,6 +264,12 @@ MutableMatrix ^ ZZ := (A, r) -> (
      if r > 1 then for i from 2 to r do result = result * A;
      result     
      )
+
+rowRankProfile = method()
+rowRankProfile MutableMatrix := (A) -> rawLinAlgRankProfile(raw A, true)
+
+columnRankProfile = method()
+columnRankProfile MutableMatrix := (A) -> rawLinAlgRankProfile(raw A, false)
      
 -- Local Variables:
 -- compile-command: "make -C $M2BUILDDIR/Macaulay2/m2 "

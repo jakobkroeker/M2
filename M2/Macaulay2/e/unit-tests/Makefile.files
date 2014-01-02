@@ -9,17 +9,21 @@ UNITTEST_CCFILES := \
     $(SHARED_UNITTEST_CCFILES) \
     ARingZZTest \
     ARingQQFlintTest \
+    ARingRRTest \
+    ARingCCTest \
     ARingRRRTest \
+    ARingCCCTest \
     ARingZZpTest \
     ARingGFTest \
     RingZZTest \
     RingZZpTest \
     RingQQTest \
-    RingRRRTest \
-    RingCCCTest \
     RingTowerTest \
     DMatZZpTest \
     SubsetTest  
+
+#    RingRRRTest \
+#    RingCCCTest \
      
 
 SHARED_UNITTEST_CFILES += \

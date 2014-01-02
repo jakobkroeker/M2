@@ -16,16 +16,14 @@
 #include <sstream>
 #include <iostream>
 #include "matrix-stream.hpp"
+#include "interrupted.hpp"
 
 bool warning_given_for_gb_or_res_over_RR_or_CC = false;
 
 void test_over_RR_or_CC(const Ring *R)
 {
-  const PolynomialRing *P = R->cast_to_PolynomialRing();
-  if (
-      (R->is_RRR() || R->is_CCC())
-      ||
-      (P != 0 && (P->getCoefficients()->is_RRR() || P->getCoefficients()->is_CCC())))
+  //const PolynomialRing *P = R->cast_to_PolynomialRing();
+  if ( R->get_precision() > 0 )
     {
       if (!warning_given_for_gb_or_res_over_RR_or_CC)
         {
@@ -991,6 +989,18 @@ void rawDisplayMatrixStream(const Matrix *inputMatrix)
 #endif
 }
 
+#if defined(HAVE_MATHICGB)
+class MGBCallback : public mgb::GroebnerConfiguration::Callback
+{
+protected:
+  virtual Action call()
+  {
+    if (system_interrupted()) 
+      return StopWithNoOutputAction;
+    return ContinueAction;
+  }
+};
+#endif
 // The following (in x-monoid.cpp) needs to be put into a header file.
 extern bool monomialOrderingToMatrix(const struct MonomialOrdering& mo,
                                      std::vector<int>& mat,
@@ -1018,6 +1028,7 @@ const Matrix * rawMGB(const Matrix *inputMatrix,
   int charac = P->charac();
   int nvars = P->n_vars();
 #if defined(HAVE_MATHICGB)
+  MGBCallback callback;
   mgb::GroebnerConfiguration configuration(charac, nvars);
 
   const auto reducerType = reducer == 0 ?
@@ -1028,8 +1039,8 @@ const Matrix * rawMGB(const Matrix *inputMatrix,
   configuration.setMaxThreadCount(nthreads);
   std::string log(logging->array, logging->len);
   configuration.setLogging(log.c_str());
-
-
+  configuration.setCallback(&callback);
+  
   std::vector<int> mat;
   bool base_is_revlex = true;
   // Now set the monomial ordering info
@@ -1039,8 +1050,9 @@ const Matrix * rawMGB(const Matrix *inputMatrix,
       return 0;
     }
   configuration.setMonomialOrder((base_is_revlex ? 
-                                    mgb::GroebnerConfiguration::BaseOrder::ReverseLexicographicBaseOrder 
-                                  : mgb::GroebnerConfiguration::BaseOrder::LexicographicBaseOrder),
+                                  //mgb::GroebnerConfiguration::BaseOrder::ReverseLexicographicBaseOrder 
+                                    mgb::GroebnerConfiguration::BaseOrder::RevLexDescendingBaseOrder 
+                                  : mgb::GroebnerConfiguration::BaseOrder::LexDescendingBaseOrder),
                                  mat);
 
 #if 0

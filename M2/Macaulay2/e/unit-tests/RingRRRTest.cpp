@@ -2,8 +2,11 @@
 
 
 #include "RingTest.hpp"
-#include "RRR.hpp"
-#include "ZZp.hpp"
+#include "aring-glue.hpp"
+#include "aring-RRR.hpp"
+//#include "ZZp.hpp"
+
+typedef M2:ConcreteRing<M2::ARingRRR> RRR;
 
 bool almostEqual(const RRR* R, int nbits, ring_elem a, ring_elem b)
 {
@@ -186,7 +189,7 @@ TEST(RingRRR, syzygy)
       EXPECT_TRUE(almostEqual(R,98,v, a));
       R->syzygy(a,b,u,v);
       ring_elem result = R->add(R->mult(a,u), R->mult(b,v));
-      EXPECT_TRUE(almostEqual(R, 95, result, R->zero()));
+      EXPECT_TRUE(almostEqual(R, 94, result, R->zero()));
     }
 }
 

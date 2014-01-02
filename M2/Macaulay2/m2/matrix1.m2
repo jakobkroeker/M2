@@ -638,10 +638,7 @@ Hom(Matrix, Module) := Matrix => (f,N) -> (
      --Hom(M',N)    
      M'N :=Hom(target f, N);
      --Hom(f,N): Hom(M',N) --> Hom(M,N)
-    if isFreeModule source f and isFreeModule target f then 
-        map(MN,M'N, mfdual**N)
-    else 
-        map(MN, M'N, ((mfdual**cN) * generators M'N)//generators MN)
+     map(MN, M'N, ((mfdual**cN) * generators M'N)//generators MN)
     )
 
 Hom(Module, Matrix) := Matrix => (M,g) -> (
@@ -671,9 +668,8 @@ dual(Matrix) := Matrix => {} >> o -> f -> (
 Matrix.InverseMethod =
 inverse Matrix := (cacheValue symbol inverse) (
      m -> (
-      if hasEngineLinearAlgebra ring m then (
-          << "calling ffpack version of InverseMethod" << endl;
-          (ring m).inverse m)
+      if hasEngineLinearAlgebra ring m then
+          basicInverse m
       else (
 	      (quo,rem) := quotientRemainder(id_(target m), m);
 	      if rem != 0 then error "matrix not invertible";

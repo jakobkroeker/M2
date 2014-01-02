@@ -189,6 +189,8 @@ extern "C" {
   /**************************************************/
   const Ring* /* or null */ rawARingZZFlint(); /* connected */
 
+  const Ring* /* or null */ rawARingQQFlint(); /* connected */
+
   const Ring /* or null */ *rawARingZZpFlint(unsigned long p); /* connected */
     /* Expects a prime number p in range 2 <= p <= 2^64-1 */
 
@@ -1314,15 +1316,6 @@ extern "C" {
                         const MutableMatrix* A,
                         const MutableMatrix* B);
 
-#if 0
-  MutableMatrix* /* or null */ rawLinAlgAddMultipleTo(MutableMatrix* C,
-                                                      const MutableMatrix* A,
-                                                      const MutableMatrix* B,
-                                                      M2_bool transposeA,
-                                                      M2_bool transposeB,
-                                                      const RingElement* a,
-                                                      const RingElement* b);
-#endif
   /* return A*B, where A,B are mutable matrices, over same ring, same density type.
    */
   MutableMatrix* /* or null */ rawLinAlgMult(const MutableMatrix* A,
@@ -1395,12 +1388,6 @@ extern "C" {
   M2_bool rawSolve(MutableMatrix *A,
                    MutableMatrix *b,
                    MutableMatrix *x); /* connected */
-
-  M2_bool rawNullspaceU(MutableMatrix *U,
-                     MutableMatrix *x); /* connected */
-  /* If U is a matrix in upper triangular echelon form (i.e.as
-     returned by LU decomp), then x is replaced with
-     a matrix whose columns form a basis for the null space of U. */
 
   M2_arrayintOrNull rawLU(const MutableMatrix *A,
                            MutableMatrix *L,

@@ -27,20 +27,22 @@ namespace M2 {
 */
   enum RingID {
     ring_example = 0,
-    ring_ZZZ,
+    ring_ZZ,
+    ring_QQ,
     ring_ZZp,
-    ring_ZZpFlint,
-    ring_logZZp,
     ring_GF,
-    ring_GFM2,
-    ring_FFPACK,
+    ring_ZZpFfpack,
+    ring_GFGivaro,
+    ring_ZZFlint,
+    ring_QQFlint,
+    ring_ZZpFlint,
     ring_RR,
     ring_CC,
     ring_RRR,
     ring_CCC,
     ring_tower_ZZp,
     ring_old,  ///< refers to all rings which are not ConcreteRing's.
-    ring_top = 8 ///< used to determine the number of ring types
+    ring_top = 16 ///< used to determine the number of ring types
   };
 
 /**
@@ -148,6 +150,7 @@ class DummyRing : public RingInterface
 
   };
 
+#if 0
 
 /**
 \ingroup rings
@@ -187,8 +190,9 @@ class DummyRing : public RingInterface
     static bool converter(const ARing *sourceR, const ARing *targetR, const RElement &a, RElement &b);
   };
 
-};
+#endif
 
+}; // namespace M2
 
 #endif
 

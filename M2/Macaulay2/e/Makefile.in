@@ -9,7 +9,7 @@ PRE.cc   = $(COMPILE.cc) -E
 include @srcdir@/Makefile.files
 include Makefile.common
 CPPFLAGS := -I. -I@srcdir@ -I../e-includes $(CPPFLAGS) -I../d -I@srcdir@/../c
-CXXFLAGS += -std=c++0x
+CXXFLAGS += -std=c++0x -Wno-unused-local-typedefs
 
 # doxygen-documentation:
 #
