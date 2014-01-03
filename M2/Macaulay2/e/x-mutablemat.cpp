@@ -1088,7 +1088,7 @@ MutableMatrix* rawLinAlgSolve(const MutableMatrix* A,
     ERROR(e.what());
     return NULL;
   }
-
+}
 /*
 MutableMatrix* 
 // or null 
