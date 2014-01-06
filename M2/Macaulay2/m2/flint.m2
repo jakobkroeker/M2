@@ -45,7 +45,7 @@ ZZFlint = makeZZFlint()
 makeQQFlint = () -> (
      rawF := try rawARingQQFlint() else null;
      if rawF === null then return null;
-     F := new ZZFlintRing from rawF;
+     F := new QQFlintRing from rawF;
      F.baseRings = {ZZFlint};
      R := ZZFlint;
      R.frac = F;
