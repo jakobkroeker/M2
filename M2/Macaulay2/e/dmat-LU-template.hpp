@@ -8,6 +8,12 @@
 #include "mat-elem-ops.hpp"
 #include "mat-util.hpp"
 
+
+extern "C" {
+        void dgetrf_ (const int *, const int *, double *, const int *, int *, int *);
+}
+
+
 template <class RingType>
 class DMatLUtemplate
 {
