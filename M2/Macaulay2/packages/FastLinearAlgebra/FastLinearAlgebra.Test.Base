@@ -1,0 +1,398 @@
+
+export {
+
+   testDivide,
+   testAdd,
+   testNegate,
+   testSubtract,
+   testMultiply,
+   testAxioms,
+   testGFArithmetic,
+   constructGivaroField,
+   constructZZpFFPACK,
+   constructMacaulayGF,
+   constructMacaulayZZp,
+   testField,
+   testAddMultipleTo
+}
+
+
+------------test functions
+
+testEqual = method();
+testEqual (MutableHashTable, ZZ) := (fieldHashTable, nrtests)->
+(
+    --todo
+    -- require random function.
+)
+testNegate = method();
+testNegate (MutableHashTable, ZZ) := (fieldHashTable,nrtests)->
+(
+    galoisField := fieldHashTable#"field";
+    fieldGen := fieldHashTable#"generator";
+    cardinality := fieldHashTable#"cardinality";
+    apply(nrtests,i->(  rnd:=random cardinality; 
+                        assert( fieldGen^rnd + (- fieldGen^rnd) == 0_galoisField );
+                    ) 
+        );
+)
+
+
+--depends on correct testNegate.
+testAdd = method();
+testAdd (MutableHashTable, ZZ) := (fieldHashTable, nrtests )->
+(
+    galoisField := fieldHashTable#"field";
+    fieldGen := galoisField_0;
+    cardinality := fieldHashTable#"cardinality";
+    apply( nrtests, i->( rnd1:=random cardinality; 
+                         rnd2:=random cardinality; 
+                         assert( fieldGen^rnd1 + fieldGen^rnd2 + (-(fieldGen)^rnd1) == fieldGen^rnd2);
+                    ) 
+        );
+)
+
+
+testSubtract = method();
+testSubtract (MutableHashTable, ZZ) := (fieldHashTable, nrtests)->
+(
+   galoisField := fieldHashTable#"field";
+  fieldGen := fieldHashTable#"generator";
+    cardinality := fieldHashTable#"cardinality";
+    apply( nrtests,i->( rnd1 := random cardinality;   
+                        rnd2 := random cardinality; 
+                        assert( fieldGen^rnd1 + fieldGen^rnd2 - fieldGen^rnd1 == fieldGen^rnd2);) 
+        );
+)
+
+-- relies on correct pow and comparison
+testMultiply = method();
+testMultiply (MutableHashTable, ZZ) :=(fieldHashTable,nrtests)->
+(
+    galoisField := fieldHashTable#"field";
+      fieldGen := fieldHashTable#"generator";
+    Zero := 0_galoisField;
+     cardinality := fieldHashTable#"cardinality";
+    characteristic := fieldHashTable#"characteristic";
+    apply( nrtests, i->( rnd1:=random cardinality;  assert( fieldGen^rnd1*Zero == Zero );) );
+    --
+    apply(nrtests, i->( rnd1:=random characteristic;
+                        rnd2:=random characteristic; 
+                        addresult := Zero; 
+                        apply(rnd1,j->addresult = addresult + fieldGen^rnd2); 
+                        assert(fieldGen^rnd2* rnd1_galoisField == addresult);) 
+        );
+)
+
+-- relies on correct pow and comparison
+testAxioms = method();
+testAxioms (MutableHashTable, ZZ) := (fieldHashTable, nrtests)->
+(
+    galoisField := fieldHashTable#"field";
+   fieldGen := fieldHashTable#"generator";
+    cardinality := fieldHashTable#"cardinality";
+    Zero := 0_galoisField;
+    apply( nrtests, i->( rnd1:=random cardinality;  assert( fieldGen^rnd1*Zero == Zero );) );
+    -- test commutative 
+    apply( nrtests, i->(      rnd1:=random cardinality;
+                            rnd2 := random cardinality; 
+                            assert( fieldGen^rnd1 * fieldGen^rnd2 == fieldGen^rnd2 * fieldGen^rnd1);
+                        assert( fieldGen^rnd1 + fieldGen^rnd2 == fieldGen^rnd2 + fieldGen^rnd1);
+                    ) 
+    );
+    --
+    -- test associative and distributive
+    apply( nrtests, i->(      rnd1:=random cardinality;
+                            rnd2 := random cardinality; 
+                            rnd3 := random cardinality;
+                            -- test associative
+                            assert( (fieldGen^rnd1 * fieldGen^rnd2) * fieldGen^rnd3 == fieldGen^rnd2 * (fieldGen^rnd1 * fieldGen^rnd3) );
+                            assert( (fieldGen^rnd1 + fieldGen^rnd2) + fieldGen^rnd3 == fieldGen^rnd2 + (fieldGen^rnd1 + fieldGen^rnd3) );
+                            -- test distributive
+                            assert( (fieldGen^rnd1 + fieldGen^rnd2) * fieldGen^rnd3 == fieldGen^rnd1 * fieldGen^rnd3  + fieldGen^rnd2 * fieldGen^rnd3 );
+                    ) 
+    );
+)
+
+--relies on correct multiplication and comparison
+testDivide = method();
+testDivide (MutableHashTable, ZZ) := ( fieldHashTable, nrtests )->
+(
+    galoisField := fieldHashTable#"field";
+     fieldGen := fieldHashTable#"generator";
+    cardinality := fieldHashTable#"cardinality";
+    One := 1_galoisField;
+    apply( nrtests, i->(    rnd1 := random cardinality;
+                            assert(( One // fieldGen^rnd1) * fieldGen^rnd1 == One );
+                       )
+        );
+    apply( cardinality, i->(  assert(( One // fieldGen^i )*fieldGen^i == One);) );
+    --
+    apply( nrtests, i->(    rnd1 := random cardinality; 
+                            rnd2 := random cardinality; 
+                            assert( (fieldGen^rnd2 // fieldGen^rnd1)*fieldGen^rnd1 == fieldGen^rnd2);
+                    ) 
+        );
+)
+
+
+testPower = method();
+testPower (MutableHashTable) := (fieldHashTable)->
+(
+    galoisField := fieldHashTable#"field";
+  fieldGen := fieldHashTable#"generator";
+    cardinality := fieldHashTable#"cardinality";
+    apply( cardinality-2 , i-> (print (fieldGen^(i+2)); assert( fieldGen^(i+2) != fieldGen)));
+    
+    assert( fieldGen^cardinality == fieldGen);
+    One := 1_galoisField; 
+    assert( fieldGen^(cardinality-1)   == One);
+    assert( fieldGen^(-2) * (fieldGen^2) == One );
+    assert( fieldGen^(-1) * fieldGen   == One );
+    -- overflow test is not possible here because of big memory consumption...
+    -- idea for overflow test: suppose elem= generator^k.  Then elem^m  is implemented as 
+    --                         generator^(k*m mod cardinality). If k*m implementation overflows this would result in an error.
+    --
+    --B := rawARingGaloisField(30013,2);
+    --c:= (B_0)^100040;
+    --c^100040;
+    --ZZP=ZZ/997;
+)
+
+constructGivaroField = method();
+constructGivaroField (ZZ,ZZ) := (characteristic,dimension)->
+(
+    result := new MutableHashTable;
+    --
+    result#"field" = rawARingGaloisField(characteristic, dimension );
+    result#"char" =  characteristic;
+    result#"characteristic" =  characteristic;
+    result#"dimension" =  dimension;
+    result#"cardinality" =  characteristic^dimension;
+    result#"generator" = (result#"field")_0;
+    assert( result#"generator"!=0_(result#"field"));
+    return result;
+)
+constructZZpFFPACK = method();
+constructZZpFFPACK (ZZ,ZZ) := (characteristic,dimension)->
+(
+    assert(dimension == 1);
+    result := new MutableHashTable;
+    --
+    result#"field" = ZZp (ideal characteristic);
+    result#"char" =  characteristic;
+    result#"characteristic" =  characteristic;
+    result#"dimension" =  dimension;
+    result#"cardinality" =  characteristic^dimension;
+
+    tmp:=GF(characteristic,1);
+    prim := (gens tmp)_0;
+    result#"generator" = sub(prim, result#"field");
+--    result#"generator"= (gens tmp)_0;
+    assert( result#"generator"!=0);
+
+    return result;
+)
+
+constructMacaulayGF = method();
+constructMacaulayGF (ZZ,ZZ) := (characteristic,dimension)->
+(
+    result := new MutableHashTable;
+    --
+    result#"field" = GF(characteristic, dimension );
+    result#"char" =  characteristic;
+    result#"characteristic" =  characteristic;
+    result#"dimension" =  dimension;
+    result#"cardinality" =  characteristic^dimension;
+    result#"generator" = (result#"field")_0;
+    assert( result#"generator"!=0_(result#"field"));
+    return result;
+)
+constructMacaulayZZp = method();
+constructMacaulayZZp (ZZ,ZZ) := (characteristic,dimension)->
+(
+    assert(dimension == 1);
+    result := new MutableHashTable;
+    --
+    result#"field" = ZZ/characteristic;
+    result#"char" =  characteristic;
+    result#"characteristic" =  characteristic;
+    result#"dimension" =  dimension;
+    result#"cardinality" =  characteristic^dimension;
+    --todo:
+    tmp:=GF(characteristic,1);
+    result#"generator"= (gens tmp)_0;
+    return result;
+)
+
+testField = method();
+testField (MutableHashTable,ZZ) := (fieldHashTable,nrTests )->
+(
+    assert( fieldHashTable#"generator" != 0 );
+    assert( fieldHashTable#"generator" != 1 );
+    --testEqual(fieldHashTable, nrTests);
+    testPower(fieldHashTable);
+    testDivide(fieldHashTable, nrTests);
+    testAdd(fieldHashTable,    nrTests);
+    testNegate(fieldHashTable, nrTests);
+    testSubtract(fieldHashTable, nrTests);
+    testMultiply(fieldHashTable, nrTests);
+    testAxioms(fieldHashTable, nrTests);
+);
+
+testGFArithmetic = method()
+testGFArithmetic GaloisField := (F) -> (
+     R := ambient F;
+     Q := F.order;
+     a := R_0;
+     b := F_0;
+     elemsR := prepend(0_R, for i from 1 to Q-1 list a^i);
+     elemsF := prepend(0_F, for i from 1 to Q-1 list b^i);
+     for i from 0 to Q-1 do assert(elemsR#i == lift(elemsF#i, R));
+     -- negation
+     for i from 0 to Q-1 do assert(- elemsR#i == lift(- elemsF#i, R));
+     -- addition table
+     for i from 0 to Q-1 do
+  	  for j from 0 to Q-1 do
+	       assert(elemsR#i + elemsR#j == lift(elemsF#i + elemsF#j, R));
+     -- subtraction table
+     for i from 0 to Q-1 do
+  	  for j from 0 to Q-1 do
+	       assert(elemsR#i - elemsR#j == lift(elemsF#i - elemsF#j, R));
+     -- multiplication table
+     for i from 0 to Q-1 do
+  	  for j from 0 to Q-1 do
+	       assert(elemsR#i * elemsR#j == lift(elemsF#i * elemsF#j, R));
+     -- division table
+     for i from 0 to Q-1 do
+  	  for j from 1 to Q-1 do
+	       assert(elemsR#i // elemsR#j == lift(elemsF#i // elemsF#j, R));
+     -- powers table
+     for i from 0 to Q-1 do 
+  	  for j from -Q to Q-1 do (
+	       if i == 0 and j <= 0 then continue;
+	       assert(elemsR#i ^ j == lift(elemsF#i ^ j, R)));
+     -- big powers table
+     for i from 0 to Q-1 do
+  	  for j from -Q to Q-1 do ( 
+	       N := j + 894723897542398472389;
+	       assert(elemsR#i ^ N == lift(elemsF#i ^ N, R)));
+     )
+
+-- this test applied only to fflas-ffpack, and due to the fact that the matrix interface changed
+--  will not be callable/relevant anymore
+
+testAddMultipleToExtended = method()
+testAddMultipleToExtended(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+
+
+  testAddMultipleTo(M3,M1,M2);
+
+     kk := ring M3;
+     numrows := numRows M3;
+     numcols := numColumns M3;
+     assert(ring M1 === kk);
+     assert(ring M2 === kk);
+
+
+     A := mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleToExt(A,  M1, transpose M2, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M2' failed");
+     --assert(A == M3 + M1*M2);
+    
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     addMultipleToExt(A, transpose M1,  M2, TransposeA=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M1' failed");
+     --assert(A == M3 + M1*M2);
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!    
+     addMultipleToExt(A, transpose M1, transpose M2, TransposeA=>true, TransposeB=>true);
+     if not (A == M3 + M1*M2) then error("testaddMultipleToExt: transposing M1',M2' failed");
+
+   
+
+     a := 0_kk;
+     b := 0_kk;
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 0_kk;
+     b = 0_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     assert(A == b*M3 + a*M1*M2);
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 1_kk;
+     b = 0_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     assert(A == b*M3 + a*M1*M2);
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 2_kk;
+     b = 0_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+       if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 1_kk;
+     b = 1_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+      if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 2_kk;
+     b = 1_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 2_kk;
+     b = 2_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
+
+     A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = 2_kk;
+     b = 3_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     if not (A == b*M3 + a*M1*M2) then
+     (
+         --print "A != b*M3 + a*M1*M2";
+         --print (A-b*M3 + a*M1*M2);
+     );
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+
+   A = mutableMatrix matrix M3;  -- 'copy' should work here!!
+     a = (char ring M3 -1)_kk;
+     b = 1_kk;
+     addMultipleToExt(A, M1, M2, Alpha=>a, Beta=>b);
+     if not (A == b*M3 + a*M1*M2) then 
+         error("computing " | toString(b) |"*M3 + "| toString (a) | "*M1*M2 failed " );
+)
+
+testaddMultipleTo = method()
+testaddMultipleTo(MutableMatrix, MutableMatrix, MutableMatrix) := (M3,M1,M2) -> (
+     kk := ring M3;
+     numrows := numRows M3;
+     numcols := numColumns M3;
+     assert(ring M1 === kk);
+     assert(ring M2 === kk);
+
+     A := mutableMatrix matrix M3;  -- 'copy' should work here!!
+     B := mutableMatrix matrix M3;
+     
+     addMultipleTo(A, M1, M2);
+     if not (A == M3 + M1*M2) then error("M3 + M1*M2 failed");
+     --assert(A == M3 + M1*M2);
+    
+  
+
+   )
+

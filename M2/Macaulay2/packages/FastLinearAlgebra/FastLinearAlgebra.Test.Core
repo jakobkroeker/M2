@@ -1,0 +1,379 @@
+
+-----------------------------------
+-- Linear algebra tests -----------
+-----------------------------------
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp(33500479, Strategy=>"FLINT")
+    M1 = mutableMatrix random(kk^300, kk^500);
+    M2 = mutableMatrix random(kk^200, kk^300);
+    M3 = mutableMatrix random(kk^200, kk^500);
+
+    testaddMultipleTo(M3,M2,M1)
+///
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp 33500479
+    M1 = mutableMatrix random(kk^300, kk^500)
+    M2 = mutableMatrix random(kk^200, kk^300)
+    M3 = mutableMatrix random(kk^200, kk^500)
+
+    testaddMultipleTo(M3,M2,M1)
+///
+
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp(67000993, Strategy => "FLINT")
+    M1 = mutableMatrix random(kk^300, kk^100);
+    M2 = mutableMatrix random(kk^200, kk^300);
+    M3 = mutableMatrix random(kk^200, kk^100);
+
+    testaddMultipleTo(M3,M2,M1)
+    time addMultipleTo(M3, M2, M1);
+///
+
+TEST ///
+{*
+restart
+loadPackage "FastLinearAlgebra"
+*}
+debug Core
+    kk = ZZp 101
+
+    M3 = mutableMatrix(kk, 200, 200)
+    fillMatrix M3;
+    time M3^-1;
+    time m3 = matrix M3;
+    time m3^-1;
+    time det m3
+    time rank m3 -- still using old code
+    time rank M3
+            
+    L = ZZ/101
+    M3 = mutableMatrix(L, 200, 200)
+    fillMatrix M3;
+    m3 = matrix M3;
+    time m3^-1;
+    m3 = matrix M3;
+    time det m3
+    time rank m3
+    
+    L = ZZp 101
+    f = random(L^4, L^2)
+    g = image f
+    h = map(g, L^3, matrix(L, {{1,2,0},{-1,4,1}}))
+    ker h -- currently calls gb
+    coker h
+    prune oo -- error
+    modulo(f, f) -- this one calls gb (actually, syz)
+    rank h -- these currently call gb too
+    rank f
+    det (f * (transpose f))
+    det((transpose f) * f)
+    p = (transpose f) * f
+    p^-1 -- this did call a gb, now it does not
+    p^-1 * p -- should call mutliplication routine for mutable matrices?
+    gens gb f
+    f // f -- doesn't work.  (is trying to call rawSolve)
+
+    
+    
+    -- matrix multiplication over ZZp p should use the fast matrix mult routines, at least for some size?
+    -- inverse: done
+    -- kernel: call nullSpace, although kernel also does other things, e.g. modulo.
+    -- syz: call nullSpace directly
+    -- modulo??
+    -- prune??  Doesn't even work with this ring.
+    -- rank: not connected to matrices yet (partly because it also needs modulo...?)
+    -- ISSUE: how to determine the cutoff for Dense vs Sparse?
+    
+    -- row and column ranks for matrices: not implemented.  Should it be?
+    -- // should use solve code that we have just written.
+    --   issue here: matrices are more general, so we need to check that it is 
+    --     a matrix of free modules?
+///
+
+TEST ///
+    -- test of routines involving modules (subquotients especially) over ZZp
+{*
+    restart
+    loadPackage "FastLinearAlgebra"
+*}
+    debug Core
+    R = ZZp 101
+    N = 1000
+    f = random(R^N, R^(N//2));
+    g = random(target f, R^(N//2 + 70));    
+    time M = subquotient(f,g);
+    
+    -- need the following routine:
+    -- modulo(f,g), where
+    --  f : F --> H  F,G,H are all free R-modules
+    --  g : G --> H
+    -- returns a matrix of the form:  P --> F, P is also a free module
+    -- such that P --> F --> H/(image g) is exact.
+    -- TODO: figure out how to do this using the fast linear algebra methods we have.
+    
+    -- another one: 'prune'
+    -- prune M, where M is a module, returns an isomorphic module, which is minimally generated and presented.
+    -- over a field, this means: write M = R^a, determine a.  Also need the maps
+    -- R^a --> M, M --> R^a.
+    
+    -- another one: "*"
+    
+    -- others: "//", "%".
+    -- f % g does the following: (f, g are matrices with same number of rows).
+    --   form a GB of g (over ZZp this is the column reduced echelon form for the matrix)
+    --   now compute f % g, meaning: reduce each column of f by the columns of g, returning
+    --   a matrix of same shape as f.
+    -- f // g:  f:F-->H, g:G-->H like above, then f//g has shape: F-->G, s.t. g (f//g) = f.
+    --   this one is precisely linear solving.
+///
+
+TEST ///
+{*
+    restart
+    loadPackage "FastLinearAlgebra"
+*}
+    debug Core
+    R = ZZp 101
+    f = matrix{{1_R,2},{3,4}}
+    g = matrix{{1_R},{1_R}}
+    g//f
+    h = R.solveLinear(f,g,true)
+    assert(f*h == g)
+    solveLinear(mutableMatrix f, mutableMatrix g, RightSide=>true)    
+
+    -- TODO: error, the following should give a size error, but doesn't
+    R.solveLinear(f,g,false)
+    solveLinear(mutableMatrix f, mutableMatrix g, RightSide=>false)    
+///
+
+TEST ///  -- CRASHING TEST 19 Dec 2012 Jakob+Mike    
+{*
+    restart
+    loadPackage "FastLinearAlgebra"
+*}
+    debug Core
+    R = ZZp 101
+
+    N = 700
+    f = random(R^N, R^N);  -- this is very slow
+    g = random(R^N, R^100);
+    h = time g//f; -- crash: sometimes creating f above crashes too
+    R.solveLinear(f,g,true)
+///
+
+TEST ///
+    debug Core
+    kk = ZZp 101
+    R = kk[t]
+    M1 = mutableMatrix matrix(kk, {{2, 16, 29}, {-18, 24, 12}, {-41, 7, -31}})
+    M2 = mutableMatrix matrix(kk, {{-39, 27, 9}, {-44, 14, 28}, {-22, -23, 14}})
+
+    assert(M1 * M2 == mutableMatrix((matrix M1) * (matrix M2)))
+    assert(rank M1 == 3)
+    assert(rank M2 == 3)
+
+    det M1
+    m1 = matrix M1
+    assert(det m1 == det M1)
+    m1^-1 -- not calling the "correct" routine?
+    M1^-1
+
+    assert(M1 * invert M1  == mutableIdentity(kk, 3))
+    assert(M1^-1 == invert M1)
+    assert(M1^2 == M1*M1)
+    assert(M1^-2 == (invert M1)*(invert M1))
+
+    cp = characteristicPolynomial(M1, R)
+    mp = minimalPolynomial(M1,R)
+    assert(mp == cp)
+    mp2 = minimalPolynomial(mutableMatrix (matrix M1 ++ matrix M1),R)
+    assert(mp2 == mp)
+    mp3 = minimalPolynomial(mutableMatrix (matrix M1 ++ matrix M2),R)
+    assert(mp3 == mp * minimalPolynomial(M2, R))
+
+    assert(nullSpace M1 == 0)
+    assert(nullSpace(M1, RightSide=>false) == 0)
+
+    M11 = mutableMatrix ((matrix M1) || (matrix M1))
+    assert(nullSpace M11 == 0)
+    assert(numRows nullSpace(M11, RightSide=>false) == 3)
+
+    X = solveLinear(M1, M2)
+    assert(M1 * X == M2)
+    Y = solveLinear(M1, M2, RightSide=>false)
+    assert(Y * M1 == M2)
+
+    assert(rowRankProfile(M1) == {0,1,2})
+    assert(columnRankProfile(M1) == {0,1,2})
+    assert(rowRankProfile(M11) == {0,1,2})
+    assert(columnRankProfile(M11) == {0,1,2})
+
+    C = mutableMatrix(kk,3,3)
+    testaddMultipleToExt(C,M1,M2)
+///
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp 101
+    M1 = mutableMatrix random(kk^3, kk^5)
+    M2 = mutableMatrix random(kk^2, kk^3)
+    M3 = mutableMatrix random(kk^2, kk^5)
+
+    testaddMultipleTo(M3,M2,M1)
+///
+
+
+
+TEST ///
+-- addMultipleTo
+    debug Core
+--67000993 to big
+-- 33500417
+
+    kk = ZZp (33500417, Strategy=>"FFPACK")
+    M1 = mutableMatrix random(kk^3, kk^5)
+    M2 = mutableMatrix random(kk^2, kk^3)
+    M3 = mutableMatrix random(kk^2, kk^5)
+
+    testaddMultipleTo(M3,M2,M1)
+///
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp 101
+    M1 = mutableMatrix random(kk^300, kk^500);
+    M2 = mutableMatrix random(kk^200, kk^300);
+    M3 = mutableMatrix random(kk^200, kk^500);
+
+    testaddMultipleTo(M3,M2,M1)
+    time addMultipleTo(M3, M2, M1);
+///
+
+TEST ///
+-- addMultipleTo
+    debug Core
+    kk = ZZp (33500417, Strategy=>"FFPACK")
+    M1 = mutableMatrix random(kk^300, kk^500);
+    M2 = mutableMatrix random(kk^200, kk^300);
+    M3 = mutableMatrix random(kk^200, kk^500);
+
+    testaddMultipleTo(M3,M2,M1)
+    time addMultipleTo(M3, M2, M1);
+///
+
+TEST ///
+    debug Core
+    kk = ZZp 101;
+    A = mutableMatrix matrix(kk, {{23, -35, -29, 33}, {22, 7, -25, 11}})
+    B = mutableMatrix matrix(kk, {{-36, -40}, {-15, -43}, {-16, -43}, {15, 32}, {6, -14}})
+    M = mutableMatrix(B*A)
+    N = nullSpace M
+    assert(numColumns N == 2)
+    assert(M * N == 0)
+    N = nullSpace(M, RightSide=>false)
+    assert(N * M == 0)
+    assert(numRows N == 3)
+///
+
+TEST ///
+    debug Core
+    N = 10
+    kk = ZZp 101
+    time A = mutableMatrix(kk, N, N, Dense=>true);
+    time fillMatrix A;
+    time B = invert A;
+    time C = A*B;
+    assert(C == mutableIdentity(kk, N))
+    idN = mutableIdentity(kk, N, Dense=>true);
+    time X = solveLinear(A, idN);
+    assert(B == X)
+///
+
+TEST ///
+  debug Core
+  R = ZZp 5
+  Rt = R[t]
+  jordanBlock = (R, diag, n) -> (
+     m := mutableMatrix(R,n,n);
+     for i from 0 to n-1 do m_(i,i) = diag;
+     for i from 0 to n-2 do m_(i,i+1) = 1;
+     m
+     )
+  jordanForm = (R, L) -> (
+     -- L is a list of (eigenvalue, size)
+     directSum apply(L, (diag, n) -> matrix jordanBlock(R, diag, n))
+     )
+  jordanBlock(R,2_R,5)
+  M = jordanForm(R, {(2_R, 4), (1_R, 2), (0_R, 6), (0_R, 3)})
+
+  cpM = characteristicPolynomial(M, Rt)
+  mpM = minimalPolynomial(M, Rt)
+
+  A = mutableMatrix random(target M, source M)
+  Ainv = A^-1
+  N = A * (mutableMatrix M) * Ainv
+
+  cpN = characteristicPolynomial(N, Rt)
+  mpN = minimalPolynomial(N, Rt)
+
+  assert(cpM == cpN)
+  assert(mpM == mpN) -- WRONG!!
+  cpM == (t-2)^4 * (t-1)^2 * t^9
+  mpM == (t-2)^4 * (t-1)^2 * t^6
+  
+  Rt1 = ZZ/5[t]
+  cp1 = sub(cpM, Rt1)
+  mp1 = sub(mpM, Rt1)
+  factor cp1
+  factor mp1
+  -- list of top level issues with ZZp:
+  -- 1. display is using too many parentheses
+  -- 2. can't factor polynomials over Rt
+  -- 3. want linear algebra to be transparent.
+  --    A^-1  DONE
+  --    det(A)  DONE
+  --    syz A
+  --    what else?
+
+  use Rt
+
+  for i from 0 to 10 do (  
+    M = jordanBlock(R,1_R,2);
+    cp = characteristicPolynomial(M, Rt);
+    mp = minimalPolynomial(M,Rt);
+    assert(cp == (t-1)^2);
+    assert(mp == cp);  -- this fails some of the time!!
+    )
+///
+
+TEST ///
+  debug Core
+  kk = ZZp 33500417
+  M = mutableMatrix(kk, 10, 10, Dense=>true)
+  fillMatrix M
+  trace M -- not defined
+  det M
+  M*M
+  M+M
+  transpose M -- redo in engine
+  ker M  -- not written
+  syz M  -- not written
+  nullSpace M
+  
+  R = kk[a..d]
+  I = ideal random(R^1, R^{-4,-4}) -- display of 2-d polys has too many parens
+  gens gb I;
+///
+
+-- move good tests above this line
+-- XXXXXXXXXXXXXXXXXXXXXXXXXX --
