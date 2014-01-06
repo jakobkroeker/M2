@@ -1,34 +1,17 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"MutableMatrix$Test$Driver",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "MutableMatrix Test Driver",
-        DebuggingMode => false
-    	)
 
-needsPackage "MutableMatrix$Test$Elementary"
-check MutableMatrix$Test$Elementary
+load "EngineTests/MutableMatrix.Test.Elementary.m2"
+load "EngineTests/MutableMatrix.Test.ReduceByPivots.m2"
 
-needsPackage "MutableMatrix$Test$ReduceByPivots"
-check "MutableMatrix$Test$ReduceByPivots"
 
 
 end
 
 --
 restart
-needsPackage "MutableMatrix$Test$Elementary"
-check MutableMatrix$Test$Elementary
+
+load "MutableMatrix.Test.Elementary.m2"
+
 
 testMutableMatrices(ZZ/101)
 

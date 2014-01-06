@@ -1,23 +1,11 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"MutableMatrix$Test$Elementary",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "MutableMatrix   Elementary Test  ",
-        DebuggingMode => false
-    	)
 
 
 --needsPackage "MutableMatrix.Test.Base"
+
+export {
+   testMutableMatrices
+}
 
 -----------------------------------------------------------------
 -- Test of MutableMatrix elementary row and column operations ---

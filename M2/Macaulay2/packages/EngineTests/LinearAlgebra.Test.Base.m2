@@ -1,20 +1,4 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"LinearAlgebra$Test$Base",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "LinearAlgebra Test Base   ",
-        DebuggingMode => false
-    	)
 
 
 export { jordanForm,
@@ -34,6 +18,8 @@ export { jordanForm,
     testLUBoundaryCases
     }
 
+
+
 debug Core;
 -----------------------------------------------------------------
 -- Test of MutableMatrix linear algebra over fields -------------
@@ -48,7 +34,7 @@ hasFlint = try (ZZp(101, Strategy=>"FLINT"); true) else false;
 needsPackage "FastLinearAlgebra"
 debug FastLinearAlgebra
 
-needsPackage "LinearAlgebra$Test$LU$Base"
+load "EngineTests/LinearAlgebra.Test.LU.Base.m2"
 
 
 jordanBlock = (R, diag, n) -> (
@@ -406,13 +392,15 @@ testSolve = (R) -> (
     -- now for more complicated examples
     -- FAILING TEST: crashes
     debug Core;
-    R = ZZp(101, Strategy=>"FFPACK");
     N := 90;
     M := mutableMatrix(R, N, N);
     fillMatrix M;
     B := mutableMatrix(R, N, 5);
     fillMatrix B;
-    time rawLinAlgSolve(raw M, raw B, true);
+    XRaw = time rawLinAlgSolve(raw M, raw B, true);
+    X= solve(M, B);
+    assert( raw X == XRaw);
+    assert(M*X-B == 0);
     )
 
 

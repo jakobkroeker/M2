@@ -1,20 +1,6 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"MutableMatrix$Test$ReduceByPivots",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "MutableMatrix  ReduceByPivots Test",
-        DebuggingMode => false
-    	)
+
+
 --------------------------
 -- reduceByPivots tests --
 --------------------------

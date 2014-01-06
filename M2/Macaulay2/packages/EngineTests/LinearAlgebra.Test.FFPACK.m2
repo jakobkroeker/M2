@@ -1,21 +1,5 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"LinearAlgebra$Test$FFPACK",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-        PackageExports => {"LinearAlgebra$Test$Base" },
-    	Headline => "LinearAlgebra FFPACK Test driver",
-        DebuggingMode => false
-    	)
+
 
 
 --------------------------------
@@ -24,11 +8,7 @@ newPackage(
 
 debug Core;
 
-path = append( path, LinearAlgebra$Test$FFPACK#"source directory");
 
-
-needsPackage "LinearAlgebra$Test$Base"
-debug LinearAlgebra$Test$Base
 
 export {
 ZZpFFPACK
@@ -40,11 +20,28 @@ ZZpFFPACK  = ( modPrime )->
   ZZp( modPrime, Strategy=>"FFPACK")
 )
 
+testSolve$FFPACK = (R) -> (
+    testSolveSimple R;
+    return;
+    -- now for more complicated examples
+    -- FAILING TEST: crashes
+    debug Core;
+    R = ZZp(101, Strategy=>"FFPACK");
+    N := 90;
+    M := mutableMatrix(R, N, N);
+    fillMatrix M;
+    B := mutableMatrix(R, N, 5);
+    fillMatrix B;
+    XRaw = time rawLinAlgSolve(raw M, raw B, true);
+    X= solve(M, B);
+    assert( raw X == XRaw);
+    assert(M*X-B == 0);
+    )
+
+
 if hasFFPACK then 
 TEST ///
-  path = append( path, LinearAlgebra$Test$FFPACK#"source directory");
   debug Core
-  --needsPackage "LinearAlgebra$Test$Base"
   R = ZZpFFPACK(2 );
   testDeterminant R;
   testMult R;
@@ -56,7 +53,6 @@ TEST ///
 
 if hasFFPACK then 
 TEST ///
-  path = append( path, LinearAlgebra$Test$FFPACK#"source directory");
   debug Core --required, why? otherwiese testLinearAlgebraSet is not defined.
   R = ZZpFFPACK ( 3 );
   testLinearAlgebraSet R;
@@ -64,7 +60,6 @@ TEST ///
 
 if hasFFPACK then 
 TEST ///
-  path = append( path, LinearAlgebra$Test$FFPACK#"source directory");
   debug Core
   R = ZZpFFPACK( 5 );
   testLinearAlgebraSet R;

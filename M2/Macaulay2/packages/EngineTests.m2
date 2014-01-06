@@ -1,5 +1,6 @@
 newPackage(
         "EngineTests",
+    	AuxiliaryFiles => true,
         Version => "0.1", 
         Date => "29 Aug 2011",
 	    Authors => {
@@ -29,11 +30,11 @@ debug Core
 --load (EngineTests#"source directory"|"EngineTests/test-gbZZ.m2")
 --load (EngineTests#"source directory"|"EngineTests/test-linalg.m2")
 
-needsPackage "LinearAlgebra.Test.Driver"
-check LinearAlgebra.Test.Driver
+load "EngineTests/LinearAlgebra.Test.Driver.m2"
+load "EngineTests/MutableMatrix.Test.Driver.m2"
+load "EngineTests/Ring.Test.Driver.m2"
 
-needsPackage "MutableMatrix.Test.Driver"
-check MutableMatrix.Test.Driver
+--check  EngineTests
 
 
 

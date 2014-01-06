@@ -1,22 +1,4 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"LinearAlgebra$Test$LU$Base",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "LinearAlgebra LU Base ",
-        DebuggingMode => false
-    	)
-
-needsPackage "LinearAlgebra$Test$Base"
 
 checkLU = method()
 checkLU(List,Matrix,Matrix) := (P,L,U) -> (

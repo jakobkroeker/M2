@@ -1,36 +1,24 @@
 -- -*- coding: utf-8 -*-
-newPackage(
-	"LinearAlgebra$Test$FLINT",
-	AuxiliaryFiles => false,
-    	Version => "0.1",
-    	Date => "January 3, 2013",
-	Authors => {
-	     {Name => "Michael E. Stillman", 
-		  Email => "mike@math.cornell.edu", 
-		  HomePage => "http://www.math.cornell.edu/People/Faculty/stillman.html"},
-	     {Name => "Jakob Kroeker", 
-		  Email => "Jakob Kröker <kroeker@uni-math.gwdg.de>", 
-		  HomePage => "" }
-	     },
-    	Headline => "LinearAlgebra FLINT Test driver",
-        DebuggingMode => false
-    	)
+
 --------------------------------
 -- flint linear algebra: ZZ/p --
 --------------------------------
 
-
-
-needsPackage "LinearAlgebra$Test$Base"
-
-ZZpFlint = (char) ->
-{
-   ZZp(char, Strategy => "FLINT")
+export {
+    ZZpFlint,
+    testLinearAlgebra$FLINT
 }
 
-testLinearAlgebraSet = (rng)->
-{
-  debug Core
+ZZpFlint = (char) ->
+(
+   ZZp(char, Strategy => "FLINT")
+)
+
+
+
+testLinearAlgebra$FLINT = (rng)->
+(
+  debug Core;
 
   testDeterminant rng;
   testMult        rng;
@@ -38,7 +26,7 @@ testLinearAlgebraSet = (rng)->
   testRank        rng;
   testNullspace   rng;
   --testSolve       rng;
-}
+)
 
   -- Not written yet: nullSpace for left side
   -- solveLinear: somehow the wrong one is being called
@@ -60,44 +48,45 @@ TEST ///
 if hasFlint then 
 TEST ///
   R = ZZpFlint( 3 )
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 if hasFlint then 
 TEST ///
   R = ZZpFlint( 5 )
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 if hasFlint then 
 TEST ///
   R = ZZpFlint( 101 )
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 if hasFlint then 
 TEST ///
   -- largest prime < 2^62
   R = ZZpFlint( 4611686018427387847 ) 
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 if hasFlint then 
 TEST ///
   -- largest prime < 2^63
   R = ZZpFlint(9223372036854775783 )
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 
 if hasFlint then 
 TEST ///
   R = ZZpFlint(maxFLINTPrime)
-  testLinearAlgebraSet R
+  testLinearAlgebra$FLINT R
 ///
 
 if hasFlint then 
 TEST ///
+  debug Core
   -- Most of this code is designed for fields...
   R = ZZFlint
   testDeterminant R
@@ -106,12 +95,13 @@ TEST ///
 
 if hasFlint then 
 TEST ///
+  debug Core
   -- Flint QQ
   R = QQFlint
   testDeterminant R
   testMult R
-  testRank R
-  testNullspace R;
+  testRank R       --FAILS
+  testNullspace R; --FAILS
 ///
 
 
