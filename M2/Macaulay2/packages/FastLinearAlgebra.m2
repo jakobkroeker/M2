@@ -1,7 +1,7 @@
 -- -*- coding: utf-8 -*-
 newPackage(
 	"FastLinearAlgebra",
-	AuxiliaryFiles => false,
+	AuxiliaryFiles => true,
     	Version => "0.1",
     	Date => "May 12, 2011",
 	Authors => {
