@@ -9,10 +9,7 @@ TEST ///
     assert(numColumns N == numColumns M - 23)
     assert((matrix M) * (matrix N) == 0)
     
-    time N = nullSpace(M, RightSide=>false);
-    assert(numRows N == numRows M - 23)
-    assert(numColumns N == numRows M)
-    assert((matrix N) * (matrix M) == 0)
+    --time N = nullSpace(M, RightSide=>false); --not supported any more
 ///
 
 TEST ///
@@ -25,10 +22,10 @@ TEST ///
     assert(numColumns N == numColumns M - 23)
     assert((matrix M) * (matrix N) == 0)
     
-    time N = nullSpace(M, RightSide=>false);
-    assert(numRows N == numRows M - 23)
-    assert(numColumns N == numRows M)
-    assert((matrix N) * (matrix M) == 0)
+    --time N = nullSpace(M, RightSide=>false); --not supported any more
+    --assert(numRows N == numRows M - 23)
+    --assert(numColumns N == numRows M)
+    --assert((matrix N) * (matrix M) == 0)
 ///
 
 TEST ///
@@ -116,7 +113,7 @@ TEST ///
 kk = ZZ/101
 A = mutableMatrix random(kk^4, kk^4)
 B = mutableMatrix random(kk^4, kk^1)
-X = solveLinear(A,B)
+X = solve(A,B)
 (matrix A) * (matrix X) - matrix B
 ///
 
@@ -124,7 +121,7 @@ TEST ///
 kk = ZZ/101
 A = mutableMatrix random(kk^100, kk^100);
 B = mutableMatrix random(kk^100, kk^5);
-X = solveLinear(A,B) 
+X = solve(A,B) 
 ((matrix A) * (matrix X)) - matrix B
 ///
 
@@ -642,7 +639,7 @@ time det M
 m = mutableMatrix M;
 time determinant m
 time rank m
-(matrix invert m) * M
+(matrix inverse m) * M
 
 M1 = M_{0} | M_{1} | M_{0} + 2*M_{1} | M_{2} | M_{2} | M_{3}
 m1 = mutableMatrix M1
@@ -659,7 +656,7 @@ m2 = mutableMatrix transpose M
 nullSpace(m2, RightSide=>false)
 B = matrix(kk, {{1,0},{0,1}})
 b = mutableMatrix B
-solveLinear(m, b)
+solve(m, b)
 
 M = matrix(kk, {{1,1,1,0}, {0,1,0,0}})
 m = mutableMatrix M
@@ -668,7 +665,7 @@ m2 = mutableMatrix transpose M
 nullSpace(m2, RightSide=>false)
 B = matrix(kk, {{0},{1} })
 b = mutableMatrix B
-x = solveLinear(m, b)
+x = solve(m, b)
 (matrix m )*(matrix x)
 
 M = random(kk^10, kk^15)
@@ -694,7 +691,7 @@ m = mutableMatrix M;
 time determinant m  -- WRONG
 rank m -- WRONG
 rank M
-time minv = invert m; -- NOT IMPLEMENTED for GF
+time minv = inverse m; -- NOT IMPLEMENTED for GF
 (matrix minv) * M
 
 for i from 0 to 3 list (
@@ -809,8 +806,8 @@ m2 = mutableMatrix(R2, 15, 15)
 fillMatrix m2
 
 needsPackage "FastLinearAlgebra"
-solveLinear(m,m)
-solveLinear(m2,m2) -- failed.
+solve(m,m)
+solve(m2,m2) -- failed.
 
 det m
 det m2 -- isn't working?
