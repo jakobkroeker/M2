@@ -81,8 +81,7 @@ class ARingGFGivaro : public RingInterface
   
     typedef ElementType     elem;
 
-    typedef  FieldType::Residu_t     UTT; ///< types depends on FieldType definition!
-    //typedef Signed_Trait<FieldType::Residu_t>::signed_type  STT;///< types depends on FieldType definition!
+    typedef  FieldType::Residu_t     UTT; 
 
     typedef std::make_signed<FieldType::Residu_t>::type STT;
 
@@ -114,7 +113,8 @@ class ARingGFGivaro : public RingInterface
    
     UTT     mCharac;
     UTT     mDimension; ///< same as extensionDegree
-    UTT     mCardinality; ///< number of elements in the field, if less than some bound, otherwise 0.
+    UTT     mCardinality; ///< number of elements in the field, if less than some bound, otherwise 0. 
+    /// @jakob should we use   mpz numbers for mCardinality  or is it not necessary?
 
     const PolynomialRing*   mOriginalRing;
     const ring_elem         mPrimitiveElement; // is an element of mOriginalRing
