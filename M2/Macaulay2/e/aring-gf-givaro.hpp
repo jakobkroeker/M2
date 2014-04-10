@@ -64,7 +64,7 @@ namespace M2 {
 namespace M2 {
 
 /**
-    @ingroup rings
+    @ingroup rings 
 
     @brief wrapper for the  Givaro::GFqDom<>  galois field implementation
 */

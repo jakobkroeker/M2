@@ -237,13 +237,13 @@ namespace M2 {
             {
                  assert( static_cast<ARingGFGivaro::UTT>(m2array->array[pos]) < pCharac); 
                  vec[pos] =  m2array->array[pos] ;
-                 assert( arrayEntry == vec[pos] );
+                 if (not  (arrayEntry == vec[pos]) )  throw "ARingGFGivaro::M2arrayToStdVec failed!";
             }
             else
             {
                assert( static_cast<ARingGFGivaro::UTT>( - (m2array->array[pos]) ) < pCharac);
                vec[pos]=  static_cast<ARingGFGivaro::UTT>(m2array->array[pos]+pCharac)  ;
-               assert( -arrayEntry == vec[pos] );
+              if (not  (- arrayEntry == vec[pos]) )  throw "ARingGFGivaro::M2arrayToStdVec failed!";
             }
         }
         return vec;
@@ -462,24 +462,9 @@ int ARingGFGivaro::get_repr(const ElementType f) const
     void ARingGFGivaro::copy(ElementType &result, const ElementType a) const { result = a; }
 
 
-    /// @jakob possible problem if type UTT is smaller than an int?
     void ARingGFGivaro::set_from_long(ElementType &result, long a) const 
     {
-      /// @jakob do we need to cast at all
-      long characteristic = static_cast<long>(mCharac);
-      assert(  static_cast<UTT>(characteristic) == mCharac );
-#warning "fix the casting spaghetti here!"
-      //std::cerr << "ARingGFGivaro::set_from_long" << std::endl;
-      ElementType p = static_cast<ElementType>(mCharac);
-      ElementType a1 = (a >= 0 ? static_cast<ElementType>(a) : static_cast<ElementType>(a + p));
-      a1 = a1 % p;
-      //      a = a % static_cast<long>(mCharac); // strange: if mCharac isn't cast away from unsigned, 
-                                          // then a is coerced to unsigned, and get the wrong answer!
-      // e.g:
-      //  (-5) % (unsigned long)(5) == 1
-      //  (-5) % (long)(5) == 0.  Wow!
-      //REmoved, since we are now making it non-negative earlier (28 April 2013)
-      //if (a < 0) a += mCharac;
+      /// the type conversion is done in givgfq.inl and should be ok in case characteristic fits in a long
       givaroField.init(result, a);
     }
 
@@ -564,7 +549,8 @@ int ARingGFGivaro::get_repr(const ElementType f) const
             //std::cerr << "mpz_n = " << mpz_n << std::endl;
             mpz_fdiv_r_ui(mpz_tmp, mpz_n, givaroField.cardinality() -1)  ;
             mpz_mul(mpz_n, mpz_a, mpz_tmp);
-            STT tmp = static_cast< STT>(mpz_fdiv_ui( mpz_n, givaroField.cardinality() -1))  ;
+            // we are fine, if givaroField.cardinality() fits in a ElementType (currently long)
+            ElementType tmp = static_cast< ElementType>(mpz_fdiv_ui( mpz_n, givaroField.cardinality() -1))  ;
             if ( tmp==0 )
             {
                 tmp+=givaroField.cardinality()-1;
@@ -585,8 +571,10 @@ int ARingGFGivaro::get_repr(const ElementType f) const
     }
 
     ///@todo ensure that  givaroField.cardinality() fits in a unsigned long, otherwise instead of mpz_fdiv_ui a different function has to be called)
-    void ARingGFGivaro::power_mpz(ElementType &result, const  ElementType a, const  mpz_ptr n) const
+     void ARingGFGivaro::power_mpz(ElementType &result, const  ElementType a, const  mpz_ptr n) const
     {
+        // we are fine, if givaroField.cardinality() fits in a ElementType=STT (currently long)
+        //STT should be the same as ElementType (see code in givgfq.h)
         STT n1 = static_cast< STT>(mpz_fdiv_ui(n, givaroField.cardinality()-1));
 
         //std::cerr << "exponent = " << n << std::endl;
@@ -681,7 +669,7 @@ extern const M2_arrayint getPolynomialCoefficients(const PolynomialRing *R, cons
       result = mOriginalRing->from_long(1);
     else
       {
-#warning "This call to power might be incorrect.  Jakob: please look at it"
+#warning "ARingGFGivaro::lift might be incorrect.  Needs testing"
         // For this code here to work, we need to compute 
         // If f is (zeta)^a, where zeta is the primitive element, then
         // we want here:
@@ -689,6 +677,14 @@ extern const M2_arrayint getPolynomialCoefficients(const PolynomialRing *R, cons
         // Also: want to insure that mPrimitiveElement is the same element as zeta!
         // (And the defining polynomials are the same too).
         // TODO: add tests and M2_ASSERT's for all of these conditions
+
+        // it should be not mandatory to cast here, since STT should be the same as type(f)
+        //result = mOriginalRing->power(mPrimitiveElement, static_cast<int>(f));
+        
+        // call is only ok, if f fits in an int:
+        int fint = static_cast<int>(f);
+        ElementType fint_converted_back=static_cast<ElementType>(fint);
+        if (not  f==fint_converted_back ) throw ("ARingGFGivaro::lift failed!");
         result = mOriginalRing->power(mPrimitiveElement, static_cast<int>(f));
       }
     
