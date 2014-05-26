@@ -3,10 +3,12 @@ LDFLAGS = -L$(BUILTLIBPATH)/lib
 CPPFLAGS =  -I$(BUILTLIBPATH)/include
 include ../include/config.Makefile
 check: clean-and-config
-clean:; rm -f config.status config.log config.args
-clean-and-config: check-config check-comment
+clean:; rm -rf tmp
+clean-and-config: check-config clean
 check-config:
-	@top_srcdir@/configure -n \
+	@ echo "make: *** [check-config] remark: the test is important (only) for testing whether the configure script detects pre-installed libraries properly" >&2
+	$(MKDIR_P) tmp
+	cd tmp && @top_srcdir@/configure \
 	    LDFLAGS="$(LDFLAGS)" \
 	    CPPFLAGS="$(CPPFLAGS)" \
 	    CC="$(CC)" \
@@ -15,12 +17,6 @@ check-config:
 	    CXXFLAGS="$(CXXFLAGS)" \
 	    --build="@build_alias@" \
 	    --disable-building
-	$(MAKE) -f Makefile clean
-check-comment:
-	@ if [ -f config.log ] ; \
-	  then echo "make: *** [check-config] remark: the test above is important (only) for testing whether the configure script detects pre-installed libraries properly" >&2 ;\
-	  fi
-
 distclean:: clean; rm -f Makefile
 Makefile: Makefile.in ; cd .. && ./config.status check-configure/Makefile
 # Local Variables:
