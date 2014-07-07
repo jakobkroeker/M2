@@ -71,6 +71,8 @@ INSTALLOPTIONS =				\
 	INCLUDEDIR=$(LIBRARIESDIR)/include	\
 	DOCDIR=$(LIBRARIESDIR)/share/doc
 
+BUILDCMD= $(MAKE) -j$(NPROCS) prefix=$(LIBRARIESDIR) $(BUILDOPTIONS) $(BUILDTARGET)
+CHECKCMD = time $(MAKE) -j$(NPROCS) check
 INSTALLCMD = $(MAKE) $(INSTALLOPTIONS) install
 
 include ../Makefile.library
