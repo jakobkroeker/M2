@@ -5,6 +5,20 @@ I = ideal(a_1+a_2+a_3+a_4+a_5+a_6,
      a_2*x-a_2*y+a_3*x-a_3*z-a_4*y-a_5*z+a_6*x-a_6*y-a_6*z,
      a_3*x*y-a_3*x*z-a_3*y*z+a_3*z^2-a_5*y*z+a_5*z^2-a_6*x*z+a_6*z^2)
 
+S = ring I
+I' = sub(I,{x=>z,z=>x,S_0=>S_2,S_2=>S_0,S_3=>S_5,S_5=>S_3})
+assert(I==I') -- equal, yep
+
+-- here's a bug?  Fitting ideal of jacobian loses this symmetry:
+
+m = minors(3,jacobian I); 
+m' = minors(3, jacobian I');
+assert(m == m')  -- not equal, yikes!
+
+time scan(decompose m, i -> print i)
+
+
+R = QQ[a_1..a_6,x,y,z]
 I = ideal(a_1+a_2+a_3+a_4+a_5+a_6,
      a_2*x-a_2*y+a_3*x-a_3*z-a_4*y-a_5*z+a_6*x-a_6*y-a_6*z)
 
@@ -19,6 +33,17 @@ assert(I==I') -- equal, yep
 m = minors(3,jacobian I); 
 m' = minors(3, jacobian I');
 assert(m == m')  -- not equal, yikes!
+
+
+m = minors(2,jacobian I); 
+m' = minors(2, jacobian I');
+assert(m == m')  -- not equal, yikes
+
+
+m = minors(4,jacobian I); 
+m' = minors(4, jacobian I');
+assert(m == m')  -- not equal, yikes
+
 
 -- decomposition shows lack of symmetry:
 

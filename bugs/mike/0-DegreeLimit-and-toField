@@ -34,3 +34,12 @@ It falls into this code:
 The problem is that gb stops at degree limit 0 but perhaps that has a different meaning
 in the engine than at top level, where x is just a constant.
 
+--
+
+ F = toField( QQ[x]/(x^2+1) )
+  assert(1 % ideal(x) ==1 ) --ok
+ assert(1 % x ==1); --fail
+
+
+ 
+

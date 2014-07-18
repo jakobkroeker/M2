@@ -11,5 +11,21 @@ I = ideal(
     x^2+x*y^2*z-2*x*y+y^4+y^2+z^2,
     -x^3*y^2+x*y^2*z+x*y*z^3-2*x*y+y^4,
     -2*x^2*y+x*y^4+y*z^4-3)
-time primaryDecomposition I
+time primaryDecomposition I -- in 1.5 takes too long; crashes in 1.6 (with ntl 5.5?) 
+
+
+
+LIB("primdec.lib");
+ring rng = 0,(x,y,z),dp;
+
+ideal I =    x^2+x*y^2*z-2*x*y+y^4+y^2+z^2,
+    -x^3*y^2+x*y^2*z+x*y*z^3-2*x*y+y^4,
+    -2*x^2*y+x*y^4+y*z^4-3;
+
+minAssChar(I); // does not finish on recent Singular, using flint and ntl 6
+
+primdecGTZ(I);
+minAssGTZ(I);
+minAssChar(I);
+char_series(I);
 
