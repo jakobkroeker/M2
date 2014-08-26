@@ -1,16 +1,16 @@
 VPATH = @srcdir@
 
 # license for mpir: GNU LGPL v2.1 or later
-VERSION = 2.6.0
+VERSION = 2.7.0
 TAROPTIONS = --bzip2
-TARFILE = $(LIBNAME)-$(VERSION).tar.bz2
+TARFILE = $(LIBNAME)-$(VERSION)-alpha9.tar.bz2
 
 # we had to patch acinclude.m4 to remove a bogus test preventing clang from compiling it:
 PRECONFIGURE = autoconf
 
-# URL = http://www.mpir.org
-URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode/trunk
-PATCHFILE = @abs_srcdir@/patch-$(VERSION)
+ URL = http://www.mpir.org
+#URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode/trunk
+#PATCHFILE = @abs_srcdir@/patch-$(VERSION)
 
 # increase the limit, because two of the tests run by mpir's "make check" will
 # not run in just 400000:
