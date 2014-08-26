@@ -63,6 +63,7 @@ readeval4(file:TokenFile,printout:bool,dictionary:Dictionary,returnLastvalue:boo
      issuePrompt := false;
      lasterrmsg := dummyError;
      while true do (
+     	  Ccode(void, "{extern void check_M2init(); check_M2init();}");
 	  if debugLevel == 123 then stderr <<  "------------ top of loop" << endl;
 	  if bumpLineNumber then (
 	       if debugLevel == 123 then stderr <<  "-- bumpLineNumber" << endl;
@@ -573,7 +574,6 @@ Exit(err:Error):void := exit(
      else errorExit
      );
 
-header "#include <unistd.h>";
 header "#include \"startup-header.h\"";
 export cachedFile := { filename:string, contents:string };
 export startupFile := cachedFile(

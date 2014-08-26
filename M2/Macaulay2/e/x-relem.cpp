@@ -31,6 +31,8 @@
 #include "aring-RRR.hpp"
 #include "aring-CCC.hpp"
 
+// The following needs to be included before any flint files are included.
+#include <M2/gc-include.h>
 #include <flint/fq_nmod.h>
 
 unsigned int rawRingHash(const Ring *R)
@@ -783,6 +785,18 @@ M2_arrayint IM2_RingElement_multidegree(const RingElement *a)
           ERROR(e.what());
           return NULL;
      }
+}
+
+const RingElement* /* or null */ rawRingElementAntipode(const RingElement* f)
+{
+  try {
+    const Ring* R = f->get_ring();
+    return RingElement::make_raw(R, R->antipode(f->get_value()));
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return NULL;
+  }
 }
 
 gmp_ZZpairOrNull rawWeightRange(M2_arrayint wts,

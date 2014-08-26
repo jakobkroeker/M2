@@ -9,27 +9,31 @@ darwin64 : always
 	mkdir -p builds.tmp/darwin64
 	cd builds.tmp/darwin64; ../../../../configure \
 		--prefix="`pwd`/installed" \
-		CC="gcc -m64" CXX="g++ -m64" \
 		--build=x86_64-apple-darwin \
 		--disable-ntl-wizard \
 		--disable-strip \
 		--enable-dmg \
-		--enable-download \
-		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory frobby pari"
+		--enable-download
+
+# make sure that CC and CXX are set in environment variables
+#		CC="gcc -m64" CXX="g++ -m64" \
+
+#		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory frobby pari"
 
 debug64 : always
 	mkdir -p builds.tmp/debug64
 	cd builds.tmp/debug64; ../../../../configure \
 		--prefix="`pwd`/installed" \
-		CC="gcc -m64" CXX="g++ -m64" \
 		--build=x86_64-apple-darwin \
 		CPPFLAGS="-DENGINE_DEBUG_" \
 		CXXFLAGS=" -U__GNUC_STDC_INLINE__" \
 		--disable-ntl-wizard \
 		--enable-debug \
 		--disable-optimize \
-		--enable-download \
-		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory  frobby pari"
+		--enable-download
+
+#		CC="gcc -m64" CXX="g++ -m64" \
+#		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory  frobby pari"
 
 # the following has all optional libs desired for linalg merge
 opt64-linalg : always
@@ -100,7 +104,6 @@ debug64-linalg : always
 	mkdir -p builds.tmp/debug64-linalg
 	cd builds.tmp/debug64-linalg; ../../../../configure \
 		--prefix="`pwd`/installed" \
-		CC="gcc -m64" CXX="g++ -m64" \
 		CPPFLAGS="-DENGINE_DEBUG_" \
 		CXXFLAGS=" -U__GNUC_STDC_INLINE__" \
 		--disable-strip \
@@ -114,6 +117,8 @@ debug64-linalg : always
 		--enable-mathicgb \
 		--enable-fplll \
 		--enable-download
+
+#		CC="gcc -m64" CXX="g++ -m64" \
 
 
 ####################
@@ -187,9 +192,9 @@ linux-opt64 : always
 		--prefix="`pwd`/installed" \
 		--disable-ntl-wizard \
 		--disable-strip \
-		--enable-download \
-		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory  frobby pari"
+		--enable-download
 
+#		--enable-build-libraries="gc gdbm mpir mpfr readline ntl factory  frobby pari"
 # 		CC="gcc -m64" CXX="g++ -m64" \
 
 linux-debug64 : always
@@ -215,6 +220,7 @@ linux-opt64-linalg : always
 		--enable-memtailor \
 		--enable-mathic \
 		--enable-mathicgb \
+		--enable-fplll \
 		--disable-strip \
 		--enable-download
 

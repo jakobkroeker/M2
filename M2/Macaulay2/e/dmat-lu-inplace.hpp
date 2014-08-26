@@ -8,6 +8,8 @@
 #include "mat-elem-ops.hpp"
 #include "mat-util.hpp"
 
+// The following needs to be included before any flint files are included.
+#include <M2/gc-include.h>
 #include <flint/perm.h>
 
 template <typename RT>
@@ -48,7 +50,7 @@ public:
 
   const Mat& LUinPlace() { computeLU(); return mLU; } // raises an exception if there is an error
   // Can be called repeatedly: the result is remembered once done.
-  // Returns a constant ref to the internal "in palce" LU.
+  // Returns a constant ref to the internal "in place" LU.
 
   bool signOfPermutation() { return mSign; }
   const std::vector<size_t>& permutation() { return mPerm; }
