@@ -189,6 +189,19 @@ LUdecomposition Matrix := (A) -> (
      (p,L,U) := LUdecomposition mutableMatrix A;
      (p, matrix L,matrix U))
 
+
+LSPdecomposition = method()
+LSPdecomposition MutableMatrix := (A) -> (
+     nrows := rawNumberOfRows raw A;
+     L := mutableMatrix(ring A,0,0,Dense=>true);
+     S := mutableMatrix(ring A,0,0,Dense=>true);
+     p := rawLSP(raw A, raw L, raw S);
+     (p, L, S))
+LSPdecomposition Matrix := (A) -> (
+     (p,L,S) := LSPdecomposition mutableMatrix A;
+     (p, matrix L,matrix S))
+
+
 solve = method(Options => { ClosestFit => false, MaximalRank => false, Precision=>0, Invertible=>false })
 solve(MutableMatrix,MutableMatrix) := opts -> (A,b) -> (
      R := ring A;

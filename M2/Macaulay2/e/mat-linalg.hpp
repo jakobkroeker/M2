@@ -217,6 +217,14 @@ namespace MatrixOps
     throw exc::engine_error("'LU' not implemented for this kind of matrix over this ring");
   }
 
+  template<typename Mat>
+  M2_arrayintOrNull LSP(const Mat& A, 
+                       Mat& L,
+                       Mat& S)
+  {
+    throw exc::engine_error("'LSP' not implemented for this kind of matrix over this ring");
+  }
+
   template<typename Mat, typename Mat2>
   bool eigenvalues(const Mat& A, 
                    Mat2& eigenvals)
@@ -386,6 +394,19 @@ namespace MatrixOps
     return stdvector_to_M2_arrayint(perm);
   }
 
+
+  template<typename RT>
+  inline M2_arrayintOrNull LSP(const DMat<RT>& A, 
+                              DMat<RT>& L,
+                              DMat<RT>& S)
+  {
+    std::vector<size_t> perm;
+    DMatLinAlg<RT> LSPdecomp(A);
+    LSPdecomp.matrixLSP(perm, L, S);
+    return stdvector_to_M2_arrayint(perm);
+  }
+
+
   template<typename RT>
   inline size_t rank(const DMat<RT>& A)
   {
@@ -400,7 +421,9 @@ namespace MatrixOps
     std::vector<size_t> profile;
     if (row_profile)
       {
+        //std::cerr << " row_profile: "<< row_profile;
         // First transpose A
+        //std::cerr << " // First transpose A";
         DMat<RT> B(A.ring(), A.numColumns(), A.numRows());
         MatrixOps::transpose(A,B);
         DMatLinAlg<RT> LUdecomp(B);
@@ -409,6 +432,7 @@ namespace MatrixOps
       }
     else
       {
+        //std::cerr << " row_profile: "<< row_profile;
         DMatLinAlg<RT> LUdecomp(A);
         LUdecomp.columnRankProfile(profile);
         return stdvector_to_M2_arrayint(profile);

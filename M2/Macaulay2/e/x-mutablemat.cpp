@@ -781,6 +781,20 @@ M2_arrayintOrNull rawLU(const MutableMatrix *A,
   }
 }
 
+M2_arrayintOrNull rawLSP(const MutableMatrix *A,
+                         MutableMatrix *L,
+                         MutableMatrix *S)
+{
+  try {
+    return A->LSP(L,S);
+  }
+  catch (exc::engine_error e) {
+    ERROR(e.what());
+    return NULL;
+  }
+}
+
+
 engine_RawArrayIntPairOrNull rawLQUPFactorization(MutableMatrix *A)
 {
   TRY return rawLQUPFactorizationInPlace(A, false); CATCH

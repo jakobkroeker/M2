@@ -3784,6 +3784,21 @@ export rawLU(e:Expr):Expr := (
 setupfun("rawLU", rawLU);
 
 
+export rawLSP(e:Expr):Expr := (
+     -- rawLSP(A, L, S) returns a list of integers (permutation)
+     when e is s:Sequence do
+     if length(s) != 3 then WrongNumArgs(3) else
+     when s.0 is A:RawMutableMatrixCell do 
+     when s.1 is L:RawMutableMatrixCell do
+     when s.2 is S:RawMutableMatrixCell do toExpr( 
+	  Ccode(RawArrayIntOrNull, "rawLSP(", A.p, ",", L.p, ",", S.p, ")"))
+     else WrongArgMutableMatrix(3)
+     else WrongArgMutableMatrix(2)
+     else WrongArgMutableMatrix(1)
+     else WrongNumArgs(3));
+setupfun("rawLSP", rawLSP);
+
+
 export rawLQUPFactorization(e:Expr):Expr := (
      -- rawLQUPFactorization(A) returns a pair of list of integers (P, Qt permutations),
      when e is m:RawMutableMatrixCell do

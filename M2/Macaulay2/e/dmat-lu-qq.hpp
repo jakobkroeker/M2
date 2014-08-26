@@ -129,6 +129,11 @@ public:
     fmpz_clear(den2);
   }
 
+  void matrixLSP(std::vector<size_t>& P, Mat& L, Mat& U)
+  {
+      throw exc::engine_error("matrixLSP not implemented yet for this type");
+  }
+
   bool solve(const Mat& B1, Mat& X1) 
   { 
     // This is the version where A = this isn't nec square or full rank...

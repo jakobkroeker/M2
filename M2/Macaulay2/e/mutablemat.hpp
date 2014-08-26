@@ -685,6 +685,9 @@ public:
   virtual M2_arrayintOrNull LU(MutableMatrix *L,
                                 MutableMatrix *U) const;
 
+  virtual M2_arrayintOrNull LSP(MutableMatrix *L,
+                                MutableMatrix *S) const;
+
   virtual bool eigenvalues(MutableMatrix *eigenvals, bool is_symm_or_hermitian) const;
 
   virtual bool eigenvectors(MutableMatrix *eigenvals,
@@ -913,6 +916,17 @@ M2_arrayintOrNull MutableMat<T>::LU(MutableMatrix* L,
   if (L1 == 0 or U1 == 0)
     throw exc::engine_error("expected matrices of the same ring/type");
   return MatrixOps::LU(mat,*L1,*U1);
+}
+
+template<typename T>
+M2_arrayintOrNull MutableMat<T>::LSP(MutableMatrix* L,
+                                    MutableMatrix* S) const
+{
+  T* L1 = L->coerce<T>();
+  T* S1 = S->coerce<T>();
+  if (L1 == 0 or S1 == 0)
+    throw exc::engine_error("expected matrices of the same ring/type");
+  return MatrixOps::LSP(mat,*L1,*S1);
 }
 
 template<typename T>

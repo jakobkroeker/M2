@@ -1441,6 +1441,10 @@ extern "C" {
      and returns false if there is an error.  The return values are placed into
      some of the (already existing) parameters of the routine */
 
+  M2_arrayintOrNull rawLSP(const MutableMatrix *A,
+                           MutableMatrix *L,
+                           MutableMatrix *S); 
+
   M2_arrayintOrNull rawLU(const MutableMatrix *A,
                            MutableMatrix *L,
                            MutableMatrix *U); /* connected */

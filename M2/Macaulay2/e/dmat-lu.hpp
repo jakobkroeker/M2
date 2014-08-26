@@ -55,6 +55,8 @@ public:
   ///         returns false iff there is an error 
   bool matrixPLU(std::vector<size_t>& P, Mat& L, Mat& U); 
 
+  bool matrixLSP(std::vector<size_t>& P, Mat& L, Mat& S); 
+
   /// Output: X, a matrix, columns form a basis of Ax=0
   ///         returns dim of nullspace
   size_t kernel(Mat& X); 
@@ -269,6 +271,12 @@ bool DMatLinAlg<RingType>::matrixPLU(std::vector<size_t>& P, Mat& L, Mat& U)
   setUpperLower(LU, L,U);
   P = mLUObject.permutation();
   return mLUObject.signOfPermutation();
+}
+
+template <class RingType>
+bool DMatLinAlg<RingType>::matrixLSP(std::vector<size_t>& P, Mat& L, Mat& U)
+{
+  throw exc::engine_error("matrixLSP not implemented yet for this type");
 }
 
 template <class RingType>

@@ -28,6 +28,12 @@ public:
     LUUtil<RingType>::computePivotColumns(LU, profile);
   }
 
+  void matrixLSP(std::vector<size_t>& P, Mat& L, Mat& U)
+  {
+      throw exc::engine_error("matrixLSP not implemented yet for this type");
+  }
+
+
   void matrixPLU(std::vector<size_t>& P, Mat& L, Mat& U)
   {
     Mat LU(mMatrix); // copy

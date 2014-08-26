@@ -55,6 +55,12 @@ public:
     P = C.permutation();
   }
 
+  void matrixLSP(std::vector<size_t>& P, Mat& L, Mat& S)
+  {
+     throw exc::engine_error("matrixLSP not implemented yet for this type");
+  }
+
+
   bool solve(const Mat& B, Mat& X) { return ffpackInterface::solveLinear(mLU, B, X); }
 
   bool solveInvertible(const Mat& B, Mat& X) { return ffpackInterface::solveLinear(mLU, B, X); }
