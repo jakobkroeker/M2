@@ -44,10 +44,6 @@ namespace M2 {
   class ARingZZpFFPACK : public RingInterface
   {
   public:
-    // @Jakob TODO: extract Signed_Trait from givaro.  Or use c++11.
-    // Questions: why names are UTT, STT?
-    // Also: whatever we call them, we want all aring classes to use them.
-    // problem: givaro isn't necessarily defined here
     static const RingID ringID = ring_ZZpFfpack;
     
     //typedef FFPACK::ModularBalanced<double> FieldType;
@@ -56,15 +52,15 @@ namespace M2 {
     typedef FieldType::Element ElementType;
     typedef ElementType elem;
 
-    typedef  uint32_t UTT; ////// attention: depends on STT;currently manual update
+    // Questions: why names are UTT, STT?  
+    // A: U is for unsigned and S is for signed, no clue what TT is for (borrowed from givaro)
+    //
+    // Also: whatever we call them, we want all aring classes to use them.
 
-    // see http://en.cppreference.com/w/cpp/types !
+    typedef  uint32_t UTT; 
+
     typedef std::make_signed<UTT>::type STT;
 
-    // if no givaro, use this:
-    //typedef  int32_t STT; /// attention: depends on UTT; currently manual update
-
-    // @todo: problem, wenn typ von cHarakteristif 
     ARingZZpFFPACK(UTT charac);
 
   public:
@@ -120,10 +116,13 @@ namespace M2 {
   /** @name translation functions
       @{ */
 
-    long coerceToLongInteger(const elem& f) const
+    /// coerce to a long integer in a balanced presentation.
+    long coerceToLongInteger(const ElementType& f) const
     {
+      assert( std::numeric_limits<long>::max() > R.getMaxModulus() ); 
+
       long result = static_cast<long>(f);
-      if (result > characteristic()/2) result -= characteristic();
+      if (result > characteristic()/2)      result -= characteristic();
       return result;
     }
 
@@ -131,6 +130,7 @@ namespace M2 {
     {
       // Note that the max modulus is small enough (about 70 million in 2013)
       // so that the coercion to an int will be correct.
+      assert( std::numeric_limits<int>::max() > R.getMaxModulus() ); //should be only checked in debug or similar mode/
       result.int_val = static_cast<int>(a);
     }
     

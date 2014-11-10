@@ -119,7 +119,7 @@ namespace M2 {
   
   void ARingZZpFFPACK::set_from_mpz(ElementType &result, const mpz_ptr a) const
   {
-    unsigned long b = static_cast<UTT>(mpz_fdiv_ui(a, mCharac));
+    unsigned long b = mpz_fdiv_ui(a, mCharac);
     mFfpackField.init(result,  b ); 
   }
   

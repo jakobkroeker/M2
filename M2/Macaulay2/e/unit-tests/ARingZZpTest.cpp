@@ -172,6 +172,72 @@ TEST(ARingZZpFFPACK, create) {
   R.clear(a);
 }
 
+TEST(ARingZZpFFPACK,is_zero)
+{
+    M2::ARingZZpFFPACK R(7);
+    M2::ARingZZpFFPACK::ElementType a;
+    R.init(a);
+    R.set_zero(a);
+    EXPECT_TRUE(R.is_zero(a));
+    R.set_from_long(a, 2);
+    EXPECT_FALSE(R.is_zero(a));
+    R.set_from_long(a, 0);
+    EXPECT_TRUE(R.is_zero(a));
+  
+}
+TEST(ARingZZpFFPACK, getMaxModulus)
+{
+    M2::ARingZZpFFPACK R(7);
+    M2::ARingZZpFFPACK::ElementType a;
+    //std::cerr << std::fixed;
+    std::cerr << std::fixed;
+    std::cerr << std::setprecision(17);
+    std::cerr << "MaxModulus = " << R.getMaxModulus() << std::endl;
+    assert( std::numeric_limits<int>::max() > R.getMaxModulus() );
+}
+
+
+/*
+TEST(ARingZZpFFPACK, setup)
+{
+    M2::ARingZZpFFPACK R(32003);
+    // check that getMaxModulus fits in a STT.
+        auto mm = R.getMaxModulus();
+        M2::ARingZZpFFPACK::STT sttVar = const_cast<M2::ARingZZpFFPACK::STT>(mm);
+        mm = sttVar;
+        assert( mm==R.getMaxModulus() );
+
+}
+
+*/
+TEST(ARingZZpFFPACK, setFromMpz)
+{
+      M2::ARingZZpFFPACK R(32003);
+      gmp_ZZ a = getRandomInteger();
+      std::cerr << "gmp_ZZ a " << a << std::endl;
+      M2::ARingZZpFFPACK::ElementType result;
+      R.set_from_mpz(result, a);
+      a = getRandomInteger();
+      std::cerr << "gmp_ZZ a " << a << std::endl;
+      R.set_from_mpz(result, a);
+
+}
+
+
+TEST(ARingZZpFFPACK,is_unit)
+{
+    M2::ARingZZpFFPACK R(101);
+    M2::ARingZZpFFPACK::ElementType a;
+    R.init(a);
+    R.set_from_long(a, 1);
+    EXPECT_TRUE(R.is_unit(a));
+    R.set_from_long(a, 2);
+    EXPECT_TRUE(R.is_unit(a));
+    R.set_from_long(a, 0);
+    EXPECT_FALSE(R.is_unit(a));
+    EXPECT_FALSE(R.is_unit(a));
+}
+
 TEST(ARingZZpFFPACK, arithmetic101) {
   M2::ARingZZpFFPACK R(101);
   testFiniteField(R, ntrials);
