@@ -192,7 +192,9 @@ TEST(ARingZZpFFPACK, getMaxModulus)
     //std::cerr << std::fixed;
     std::cerr << std::fixed;
     std::cerr << std::setprecision(17);
-    std::cerr << "MaxModulus = " << R.getMaxModulus() << std::endl;
+    //std::cerr << "MaxModulus = " << R.getMaxModulus() << std::endl;
+    double refMaxModulus = 33554432.0;
+    assert( refMaxModulus == R.getMaxModulus() );
     assert( std::numeric_limits<int>::max() > R.getMaxModulus() );
 }
 
@@ -277,6 +279,10 @@ TEST(ARingZZpFFPACK, arithmetic66000007) {
 
 //TODO: commented out because it takes too long:
 // Actually: now this characteristic seems too big?!
+// Answer:  characteristic > 33500479 was unsafe 
+// for matrix-matrix operations when using Modular<double> instead of ModularBalanced<double>
+// (we use Modular<double>  , otherwise we had problems with F_2)!
+// see https://github.com/jakobkroeker/M2/issues/65
 TEST(ARingZZpFFPACK, arithmetic67108859) {
   M2::ARingZZpFFPACK R(67108859);  
 

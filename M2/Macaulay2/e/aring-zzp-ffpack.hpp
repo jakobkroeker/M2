@@ -119,7 +119,7 @@ namespace M2 {
     /// coerce to a long integer in a balanced presentation.
     long coerceToLongInteger(const ElementType& f) const
     {
-      assert( std::numeric_limits<long>::max() > R.getMaxModulus() ); 
+      assert( std::numeric_limits<long>::max() > getMaxModulus() ); 
 
       long result = static_cast<long>(f);
       if (result > characteristic()/2)      result -= characteristic();
@@ -130,7 +130,7 @@ namespace M2 {
     {
       // Note that the max modulus is small enough (about 70 million in 2013)
       // so that the coercion to an int will be correct.
-      assert( std::numeric_limits<int>::max() > R.getMaxModulus() ); //should be only checked in debug or similar mode/
+      assert( std::numeric_limits<int>::max() > getMaxModulus() ); //should be only checked in debug or similar mode/
       result.int_val = static_cast<int>(a);
     }
     
