@@ -513,6 +513,7 @@ void rawFactorBase(const RingElement *g,
             algebraicElement_M2 = RingElement::make_raw(P,P->var(P->n_vars()-1)); // the algebraic generator is always the last variable in M2, the first one in factory
           }
           else {
+            std::cerr << "inExtension" << std::endl;
             CanonicalForm h = convertToFactory(*g,inExtension);
             // displayCF(P,h);
             q = factorize(h);

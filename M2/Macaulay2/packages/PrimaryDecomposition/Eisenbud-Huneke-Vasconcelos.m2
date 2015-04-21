@@ -16,6 +16,7 @@ ass1 := (I) -> (
      RI := ring I;
      polyRing := ring presentation RI;
      I1 := lift(I, polyRing);
+     (<< "  I1 := lift(I, polyRing); "  << I1 );
      i := codim I1;
      d := dim polyRing;
      local currentext;
@@ -25,8 +26,12 @@ ass1 := (I) -> (
      while i <= d do ( 
 	  if debugLevel >= 2 then (<< "  associatedPrimes loop " << i << endl);
 	  currentext = Ext^i(polyRing^1/I1,polyRing);
+      (<< "  associatedPrimes loop " << i << endl);
+       (<< "  currentext   " << currentext << endl);
 	  if codim currentext == i then (
-	       firstlist := minimalPrimes ann currentext;
+          (<< "  ann currentext   " << ann currentext << endl);
+  	       firstlist := minimalPrimes ann currentext;
+           (<< "  ann firstlist   " <<firstlist << endl);
 	       scan(firstlist, P -> (if codim P == i then (
 			      if debugLevel >= 1 then << "    " << P  << endl << endl ;
 			      assassinator = append(assassinator,P)))
