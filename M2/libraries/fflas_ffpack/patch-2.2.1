@@ -1,0 +1,37 @@
+--- fflas-ffpack-2.2.1/fflas-ffpack/fflas/fflas_simd/simd128_int64.inl 2016-05-26 23:11:48.431860721 +0200
++++ fflas-ffpack-2.2.1/fflas-ffpack/fflas/fflas_simd/simd128_int64.inl.new     2016-05-27 01:40:56.488165564 +0200
+@@ -461,7 +461,6 @@ template <> struct Simd128_impl<true, tr
+         b = sub(x, b);
+         return _mm_cmpgt_epi64(a, b);
+ #else
+-#warning "The simd greater function is emulate, it may impact the performances."
+         Converter ca, cb;
+         ca.v = a;
+         cb.v = b;
+@@ -477,7 +476,6 @@ template <> struct Simd128_impl<true, tr
+         b = sub(x, b);
+         return _mm_cmpgt_epi64(a, b);
+ #else
+-#warning "The simd greater function is emulate, it may impact the performances."
+         Converter ca, cb;
+         ca.v = a;
+         cb.v = b;
+--- fflas-ffpack-2.2.1/fflas-ffpack/fflas/fflas_simd/simd128_int64.inl 2016-05-27 01:45:07.994577123 +0200
++++ fflas-ffpack-2.2.1/fflas-ffpack/fflas/fflas_simd/simd128_int64.inl.new     2016-05-27 01:47:10.040330122 +0200
+@@ -248,7 +248,6 @@ template <> struct Simd128_impl<true, tr
+ #ifdef __SSE4_2__
+         return _mm_cmpgt_epi64(a, b);
+ #else
+-#warning "The simd greater function is emulate, it may impact the performances."
+         Converter ca, cb;
+         ca.v = a;
+         cb.v = b;
+@@ -260,7 +259,6 @@ template <> struct Simd128_impl<true, tr
+ #ifdef __SSE4_2__
+         return _mm_cmpgt_epi64(b, a);
+ #else
+-#warning "The simd lesser function is emulate, it may impact the performances."
+         Converter ca, cb;
+         ca.v = a;
+         cb.v = b;
+ 

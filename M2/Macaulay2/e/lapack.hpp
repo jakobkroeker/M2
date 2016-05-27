@@ -140,13 +140,16 @@ void cblas_dgemm(const int Order,     // how matrices are stored, by column or r
                  const double beta,   // scalar bet
                  double *C,           // matrix C; on output, alphaAB+betaC
                  const int ldc);      // rows of C
-#endif
 
 // computes ax
 void cblas_dscal(const int n,     // length of vectors
                  const double a,  // scalar alpha
                  const double* x, // vector x
                  const int incx); // increment of x
+
+#endif
+
+
 
 
 int zgesv_(int *n,    // number of rows in A
@@ -259,13 +262,15 @@ void cblas_daxpy(const int n,     // length of vectors
                  const int incx,  // increment of x
                  double* y,       // vector y
                  const int incy); // increment of y
-#endif
 
 // computes ax
 void cblas_dscal(const int n,     // length of vectors
                  const double a,  // scalar alpha
                  const double* x, // vector x
                  const int incx); // increment of x
+#endif
+
+
 
 
 // computes "alpha AB + beta C"

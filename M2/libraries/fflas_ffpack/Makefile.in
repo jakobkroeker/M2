@@ -8,8 +8,8 @@ PATCHFILE = @abs_srcdir@/patch-$(VERSION)
 
 ## version 2.2.1 works with (only) givaro 4.0.1
 ## version 2.2.1 doesn't yet compile with e dir.
-#VERSION = 2.2.1
-#URL = https://github.com/linbox-team/fflas-ffpack/releases/download/v2.2.1/
+VERSION = 2.2.1
+URL = https://github.com/linbox-team/fflas-ffpack/releases/download/v2.2.1/
 
 TARDIR = fflas-ffpack-$(VERSION)
 TARFILE = fflas-ffpack-$(VERSION).tar.gz
@@ -19,7 +19,7 @@ PRECONFIGURE = NOCONFIGURE=yes
 # INSTALLCMD = $(MKDIR_P) $(LIBRARIESDIR)/include/fflas-ffpack && \
 # 		@INSTALL_DATA@ include/config-blas.h $(LIBRARIESDIR)/include/. && \
 # 		@INSTALL_DATA@ include/fflas-ffpack/*.{h,inl} $(LIBRARIESDIR)/include/fflas-ffpack/.
-CONFIGOPTIONS += --with-givaro=$(LIBRARIESDIR) --with-blas=yes LIBS="-lblas -lgivaro @FCLIBS_STATIC@ @FCLIBS_DYNAMIC@"
+CONFIGOPTIONS += --with-givaro=$(LIBRARIESDIR) --with-blas-libs="-L/home/jakob/libselect/ /usr/lib64/atlas/libsatlas.so.3    " LIBS="-L/home/jakob/libselect/  -lgivaro @FCLIBS_STATIC@ @FCLIBS_DYNAMIC@"
 include ../Makefile.library
 Makefile: @srcdir@/Makefile.in ; cd ../.. && ./config.status libraries/fflas_ffpack/Makefile
 # Local Variables:

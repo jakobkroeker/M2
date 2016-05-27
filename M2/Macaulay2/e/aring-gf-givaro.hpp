@@ -42,10 +42,10 @@ namespace M2 {
 };
 
 #else
-#include <givaro/givgfq.h>
+#include <givaro/gfq.h>
 #include <givaro/givpower.h>
 #include <givaro/givtimer.h>
-#include <givaro/givextension.h>     //multiple definition problem...   solvable by encapsulating (see linbox)? Also solvable with the namespace trick, but do not overuse that...
+#include <givaro/extension.h>     //multiple definition problem...   solvable by encapsulating (see linbox)? Also solvable with the namespace trick, but do not overuse that...
 #include <math.h>
 #include <givaro/givinteger.h>
 #include <givaro/givintnumtheo.h>
@@ -80,6 +80,8 @@ class ARingGFGivaro : public RingInterface
     //typedef Signed_Trait<FieldType::Residu_t>::signed_type  STT;///< types depends on FieldType definition!
 
     typedef std::make_signed<FieldType::Residu_t>::type STT;
+    
+    //typedef GIV_randIter<FieldType, STT> RandIter;
 
 
     ARingGFGivaro( UTT charac_,   UTT dimension_);
@@ -116,7 +118,7 @@ class ARingGFGivaro : public RingInterface
 
     const FieldType     givaroField;
  
-    mutable  FieldType::randIter     givaroRandomIterator;
+    mutable  FieldType::RandIter     givaroRandomIterator;
 
     size_t      mGeneratorExponent;  
 
@@ -263,7 +265,7 @@ class ARingGFGivaro : public RingInterface
             void swap(ElementType &a, ElementType &b) const;
 
 
-            void random(FieldType::randIter &it, ElementType &result) const;
+            void random(FieldType::RandIter &it, ElementType &result) const;
             void random(ElementType &result) const;
             
     /** @} */

@@ -164,7 +164,7 @@ engine_RawArrayIntPairOrNull rawLQUPFactorizationInPlace(MutableMatrix *A, M2_bo
   std::vector<size_t> Qt(nelems, -1);
   
   // ignore return value (rank) of:
-  LUdivine(mat->ring().field(),
+  FFPACK::LUdivine(mat->ring().field(),
                        FFLAS::FflasNonUnit,
                        (transpose ? FFLAS::FflasTrans : FFLAS::FflasNoTrans),
                        mat->numRows(),

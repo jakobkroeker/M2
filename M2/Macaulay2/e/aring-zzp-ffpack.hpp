@@ -7,10 +7,14 @@
 #include "buffer.hpp"
 #include "ringelem.hpp"
 #include <iostream>
-#include <fflas-ffpack/field/modular-balanced.h>
-#include <fflas-ffpack/field/modular-double.h>
+//#include <fflas-ffpack/field/modular-balanced.h>
+//#include <fflas-ffpack/field/modular-double.h>
 #include <fflas-ffpack/ffpack/ffpack.h>
 //#include <givaro/givgfq.h>
+
+#include "givaro/modular.h"
+using Givaro::Modular ;
+using Givaro::ModularBalanced ;
 
 namespace M2 {
 
@@ -30,7 +34,7 @@ namespace M2 {
     static const RingID ringID = ring_ZZpFfpack;
     
     //typedef FFPACK::ModularBalanced<double> FieldType;
-    typedef FFPACK::Modular<double> FieldType;
+    typedef Modular<double> FieldType;
 
     typedef FieldType::Element ElementType;
     typedef ElementType elem;
@@ -204,11 +208,11 @@ namespace M2 {
     
     static inline double getMaxModulus() 
     {
-      if  (std::is_same<FFPACK::Modular<double> , FieldType>::value)
+      if  (std::is_same<Modular<double> , FieldType>::value)
       {
-	    return FieldType::getMaxModulus()/2;
+	    return FieldType::maxCardinality()/2;
       }
-      return FieldType::getMaxModulus();
+      return FieldType::maxCardinality();
     }
   /** @} */
 

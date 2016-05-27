@@ -1,6 +1,6 @@
 #VERSION = 1.2.0
-VERSION = 1.3.2
-URL = http://www.linalg.org
+VERSION = 1.4.1
+URL = https://github.com/linbox-team/linbox/releases/download/v1.4.1
 #URL = http://www.math.uiuc.edu/Macaulay2/Downloads/OtherSourceCode
 PRECONFIGURE = autoreconf -i
 
